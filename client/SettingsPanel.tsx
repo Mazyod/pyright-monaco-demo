@@ -8,7 +8,6 @@ import { useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { CheckmarkMenu, CheckmarkMenuItem } from './CheckmarkMenu';
 import IconButton from './IconButton';
-import { getLocaleDisplayName, supportedLocales } from './Locales';
 import { Menu, MenuRef } from './Menu';
 import { PlaygroundSettings } from './PlaygroundSettings';
 import PushButton from './PushButton';
@@ -196,35 +195,6 @@ export function SettingsPanel(props: SettingsPanelProps) {
                             props.onUpdateSettings({
                                 ...props.settings,
                                 pythonPlatform: index > 0 ? item.label : undefined,
-                            });
-                        }}
-                    />
-                </Menu>
-            </View>
-
-            <SettingsDivider />
-            <SettingsHeader headerText={'Language'} />
-            <View style={styles.selectionContainer}>
-                <Text style={styles.selectedOptionText} selectable={false}>
-                    {getLocaleDisplayName(props.settings.locale) || 'Browser Default'}
-                </Text>
-                <MenuButton
-                    onPress={() => {
-                        localeMenuRef.current?.open();
-                    }}
-                />
-                <Menu name={'locale'} ref={localeMenuRef}>
-                    <CheckmarkMenu
-                        items={supportedLocales.map((locale) => {
-                            return {
-                                label: locale.displayName,
-                                checked: locale.code === (props.settings.locale ?? ''),
-                            };
-                        })}
-                        onSelect={(item, index) => {
-                            props.onUpdateSettings({
-                                ...props.settings,
-                                locale: index > 0 ? supportedLocales[index].code : undefined,
                             });
                         }}
                     />
