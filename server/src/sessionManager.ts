@@ -7,17 +7,11 @@
 import * as fs from 'fs';
 import { exec, fork } from 'node:child_process';
 import * as os from 'os';
-import packageJson from 'package-json';
 import * as path from 'path';
 import { v4 as uuid } from 'uuid';
 import { LspClient } from './lspClient';
 import { Session, SessionId, SessionOptions } from './session';
 import { logger } from './logging';
-
-export interface InstallPyrightInfo {
-    pyrightVersion: string;
-    localDirectory: string;
-}
 
 // Map of active sessions indexed by ID
 const activeSessions = new Map<SessionId, Session>();
@@ -70,9 +64,7 @@ export async function createSession(
         return restartSession(inactiveSession, sessionOptions);
     }
 
-    return installPyright(sessionOptions?.pyrightVersion).then((info) => {
-        return startSession(info.localDirectory, sessionOptions);
-    });
+    return startSession("", sessionOptions);
 }
 
 // Places an existing session into an inactive pool that can be used
@@ -96,61 +88,6 @@ export function recycleSession(sessionId: SessionId) {
     }
 
     logger.info(`Recycling session (currently ${inactiveSessions.length} in inactive queue)`);
-}
-
-export async function getPyrightVersions(): Promise<string[]> {
-    return packageJson('pyright', { allVersions: true, fullMetadata: false })
-        .then((response) => {
-            let versions = Object.keys(response.versions);
-
-            // Filter out the really old versions (1.0.x).
-            versions = versions.filter((version) => !version.startsWith('1.0.'));
-
-            // Return the latest version first.
-            versions = versions.reverse();
-
-            // Limit the number of versions returned.
-            versions = versions.slice(0, maxPyrightVersionCount);
-
-            return versions;
-        })
-        .catch((err) => {
-            throw new Error(`Failed to get versions of pyright: ${err}`);
-        });
-}
-
-export async function getPyrightLatestVersion(): Promise<string> {
-    const timeSinceLastRequest = Date.now() - lastVersionRequestTime;
-
-    if (timeSinceLastRequest < timeBetweenVersionRequestsInMs) {
-        logger.info(`Returning cached latest pyright version: ${lastVersion}`);
-        return lastVersion;
-    }
-
-    return packageJson('pyright')
-        .then((response) => {
-            if (typeof response.version === 'string') {
-                logger.info(`Received latest pyright version from npm index: ${response.version}`);
-
-                lastVersionRequestTime = Date.now();
-
-                if (lastVersion !== response.version) {
-                    lastVersion = response.version;
-
-                    // We need to terminate all inactive sessions because an empty
-                    // version string in the session options changes meaning when
-                    // the version of pyright changes.
-                    terminateInactiveSessions();
-                }
-
-                return response.version;
-            }
-
-            throw new Error(`Received unexpected latest version for pyright`);
-        })
-        .catch((err) => {
-            throw new Error(`Failed to get latest version of pyright: ${err}`);
-        });
 }
 
 function startSession(binaryDirPath: string, sessionOptions?: SessionOptions): Promise<SessionId> {
@@ -360,43 +297,6 @@ function getCompatibleInactiveSession(sessionOptions?: SessionOptions): Session 
 
     logger.info(`Found compatible inactive session`);
     return inactiveSessions.splice(sessionIndex, 1)[0];
-}
-
-async function installPyright(requestedVersion: string | undefined): Promise<InstallPyrightInfo> {
-    logger.info(`Pyright version ${requestedVersion || 'latest'} requested`);
-
-    let version: string;
-    if (requestedVersion) {
-        version = requestedVersion;
-    } else {
-        version = await getPyrightLatestVersion();
-    }
-
-    return new Promise<InstallPyrightInfo>((resolve, reject) => {
-        const dirName = `./pyright_local/${version}`;
-
-        if (fs.existsSync(dirName)) {
-            logger.info(`Pyright version ${version} already installed`);
-            resolve({ pyrightVersion: version, localDirectory: dirName });
-            return;
-        }
-
-        logger.info(`Attempting to install pyright version ${version}`);
-        exec(
-            `mkdir -p ${dirName}/node_modules && cd ${dirName} && npm install pyright@${version}`,
-            (err) => {
-                if (err) {
-                    logger.error(`Failed to install pyright ${version}`);
-                    reject(`Failed to install pyright@${version}`);
-                    return;
-                }
-
-                logger.info(`Install of pyright ${version} succeeded`);
-
-                resolve({ pyrightVersion: version, localDirectory: dirName });
-            }
-        );
-    });
 }
 
 function synthesizeVenvDirectory(tempDirPath: string) {

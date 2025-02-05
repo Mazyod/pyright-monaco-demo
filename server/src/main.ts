@@ -3,7 +3,6 @@
  * Main entry point for the app server.
  */
 
-import * as appInsight from 'applicationinsights';
 import bodyParser from 'body-parser';
 import * as dotenv from 'dotenv';
 import express, { NextFunction, Request, Response } from 'express';
@@ -14,21 +13,6 @@ import { logger } from './logging';
 try {
     // Load environment variables from ".env" file.
     dotenv.config();
-
-    const appInsightsKey = process.env.APPLICATIONINSIGHTS_CONNECTION_STRING;
-    if (appInsightsKey) {
-        appInsight
-            .setup(appInsightsKey)
-            .setAutoDependencyCorrelation(true)
-            .setAutoCollectRequests(true)
-            .setAutoCollectPerformance(true, true)
-            .setAutoCollectExceptions(true)
-            .setAutoCollectDependencies(true)
-            .setAutoCollectConsole(true, true)
-            .setSendLiveMetrics(false)
-            .setDistributedTracingMode(appInsight.DistributedTracingModes.AI)
-            .start();
-    }
 
     startService();
 } catch (err) {

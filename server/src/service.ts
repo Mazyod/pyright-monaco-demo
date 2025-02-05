@@ -18,14 +18,7 @@ interface CodeWithOptions {
 // Retrieves the current status of the service including the
 // versions of pyright that it supports.
 export function getStatus(req: Request, res: Response) {
-    SessionManager.getPyrightVersions()
-        .then((pyrightVersions) => {
-            res.status(200).json({ pyrightVersions });
-        })
-        .catch((err) => {
-            logger.error(`getStatus returning a 500: ${err}`);
-            res.status(500).json({ message: err || 'An unexpected error occurred' });
-        });
+    res.status(200).json({ pyrightVersions: [] });
 }
 
 // Creates a new language server session and returns its ID.

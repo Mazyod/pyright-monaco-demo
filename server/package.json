@@ -2,11 +2,10 @@
     "name": "pyright-playground-server",
     "version": "1.0.0",
     "dependencies": {
-        "applicationinsights": "^2.9.0",
         "cors": "^2.8.5",
         "dotenv": "^16.0.3",
         "express": "^4.19.2",
-        "package-json": "^8.1.1",
+        "pyright": "^1.1.393",
         "uuid": "^9.0.1",
         "vscode-jsonrpc": "^8.2.0",
         "vscode-languageclient": "^9.0.1",
