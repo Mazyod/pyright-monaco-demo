@@ -7,66 +7,6 @@ import * as lzString from 'lz-string';
 import { PlaygroundState } from './PlaygroundSettings';
 import { configSettingsMap } from './PyrightConfigSettings';
 
-export function updateUrlFromState(state: PlaygroundState): string {
-    const { code, settings } = state;
-    const url = new URL(window.location.href);
-
-    // Delete all of the existing query parameters.
-    url.searchParams.forEach((_, key) => {
-        url.searchParams.delete(key);
-    });
-
-    url.search = '';
-
-    if (settings) {
-        if (settings.pyrightVersion) {
-            url.searchParams.set('pyrightVersion', settings.pyrightVersion);
-        }
-
-        if (settings.pythonVersion) {
-            url.searchParams.set('pythonVersion', settings.pythonVersion);
-        }
-
-        if (settings.pythonPlatform) {
-            url.searchParams.set('pythonPlatform', settings.pythonPlatform);
-        }
-
-        if (settings.strictMode) {
-            url.searchParams.set('strict', 'true');
-        }
-
-        if (settings.locale) {
-            url.searchParams.set('locale', settings.locale);
-        }
-
-        Object.keys(settings.configOverrides).forEach((key) => {
-            const value = settings.configOverrides[key];
-            url.searchParams.set(key, value.toString());
-        });
-
-        if (code) {
-            // Use compression for the code.
-            const encodedCode = lzString.compressToEncodedURIComponent(code);
-            url.searchParams.set('code', encodedCode);
-        }
-    }
-
-    // Firefox throws an exception in safe mode if this call is made
-    // too often. To prevent a crash, catch the exception and ignore it.
-    try {
-        window.history.pushState(null, null, url.toString());
-    } catch {
-        // Do nothing.
-    }
-
-    // Replace the domain name with the canonical one before
-    // returning the shareable URL.
-    url.host = 'pyright-play.net';
-    url.protocol = 'https';
-    url.port = '';
-    return url.toString();
-}
-
 export function getStateFromUrl(): PlaygroundState | undefined {
     const url = new URL(window.location.href);
 

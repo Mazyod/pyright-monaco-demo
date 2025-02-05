@@ -15,7 +15,7 @@ import { MonacoEditor } from './MonacoEditor';
 import { PlaygroundSettings } from './PlaygroundSettings';
 import { ProblemsPanel } from './ProblemsPanel';
 import { RightPanel, RightPanelType } from './RightPanel';
-import { getStateFromUrl, updateUrlFromState } from './UrlUtils';
+import { getStateFromUrl } from './UrlUtils';
 
 const lspClient = new LspClient();
 
@@ -119,7 +119,6 @@ export default function App() {
 
     useEffect(() => {
         setStateToLocalStorage({ code: appState.code, settings: appState.settings });
-        updateUrlFromState(appState);
     }, [appState.code, appState.settings]);
 
     useEffect(() => {
@@ -208,9 +207,6 @@ export default function App() {
                             });
                         }}
                         code={appState.code}
-                        getShareableUrl={() => {
-                            return updateUrlFromState(appState);
-                        }}
                     />
                 </View>
                 <ProblemsPanel
