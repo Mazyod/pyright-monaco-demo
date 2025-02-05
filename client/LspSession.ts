@@ -60,50 +60,23 @@ export class LspSession {
 
     static async getPyrightServiceStatus(): Promise<ServerStatus> {
         const endpoint = appServerApiAddressPrefix + `status`;
-        return endpointRequest('GET', endpoint)
-            .then(async (response) => {
-                const data = await response.json();
-                if (!response.ok) {
-                    throw data;
-                }
-                return { pyrightVersions: data.pyrightVersions };
-            })
-            .catch((err) => {
-                throw err;
-            });
+        const data = await endpointRequest('GET', endpoint);
+        return { pyrightVersions: data.pyrightVersions };
     }
 
     async getDiagnostics(code: string): Promise<Diagnostic[]> {
         return this._doWithSession<Diagnostic[]>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/diagnostics`;
-            return endpointRequest('POST', endpoint, { code })
-                .then(async (response) => {
-                    const data = await response.json();
-                    if (!response.ok) {
-                        throw data;
-                    }
-                    return data.diagnostics;
-                })
-                .catch((err) => {
-                    throw err;
-                });
+            const data = await endpointRequest('POST', endpoint, { code });
+            return data.diagnostics;
         });
     }
 
     async getHoverForPosition(code: string, position: Position): Promise<HoverInfo | undefined> {
         return this._doWithSession<HoverInfo>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/hover`;
-            return endpointRequest('POST', endpoint, { code, position })
-                .then(async (response) => {
-                    const data = await response.json();
-                    if (!response.ok) {
-                        throw data;
-                    }
-                    return data.hover;
-                })
-                .catch((err) => {
-                    throw err;
-                });
+            const data = await endpointRequest('POST', endpoint, { code, position });
+            return data.hover;
         });
     }
 
@@ -114,17 +87,8 @@ export class LspSession {
     ): Promise<WorkspaceEdit | undefined> {
         return this._doWithSession<WorkspaceEdit>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/rename`;
-            return endpointRequest('POST', endpoint, { code, position, newName })
-                .then(async (response) => {
-                    const data = await response.json();
-                    if (!response.ok) {
-                        throw data;
-                    }
-                    return data.edits;
-                })
-                .catch((err) => {
-                    throw err;
-                });
+            const data = await endpointRequest('POST', endpoint, { code, position, newName });
+            return data.edits;
         });
     }
 
@@ -134,17 +98,8 @@ export class LspSession {
     ): Promise<SignatureHelp | undefined> {
         return this._doWithSession<SignatureHelp>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/signature`;
-            return endpointRequest('POST', endpoint, { code, position })
-                .then(async (response) => {
-                    const data = await response.json();
-                    if (!response.ok) {
-                        throw data;
-                    }
-                    return data.signatureHelp;
-                })
-                .catch((err) => {
-                    throw err;
-                });
+            const data = await endpointRequest('POST', endpoint, { code, position });
+            return data.signatureHelp;
         });
     }
 
@@ -154,34 +109,16 @@ export class LspSession {
     ): Promise<CompletionList | undefined> {
         return this._doWithSession<CompletionList>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/completion`;
-            return endpointRequest('POST', endpoint, { code, position })
-                .then(async (response) => {
-                    const data = await response.json();
-                    if (!response.ok) {
-                        throw data;
-                    }
-                    return data.completionList;
-                })
-                .catch((err) => {
-                    throw err;
-                });
+            const data = await endpointRequest('POST', endpoint, { code, position });
+            return data.completionList;
         });
     }
 
     async resolveCompletionItem(item: CompletionItem): Promise<CompletionItem | undefined> {
         return this._doWithSession<CompletionItem>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/completionresolve`;
-            return endpointRequest('POST', endpoint, { completionItem: item })
-                .then(async (response) => {
-                    const data = await response.json();
-                    if (!response.ok) {
-                        throw data;
-                    }
-                    return data.completionItem;
-                })
-                .catch((err) => {
-                    throw err;
-                });
+            const data = await endpointRequest('POST', endpoint, { completionItem: item });
+            return data.completionItem;
         });
     }
 
@@ -249,18 +186,9 @@ export class LspSession {
         }
 
         const endpoint = appServerApiAddressPrefix + `session`;
-        const sessionId = await endpointRequest('POST', endpoint, sessionOptions).then(
-            async (response) => {
-                const data = await response.json();
-                if (!response.ok) {
-                    throw data;
-                }
-                return data.sessionId;
-            }
-        );
-
-        this._sessionId = sessionId;
-        return sessionId;
+        const data = await endpointRequest('POST', endpoint, sessionOptions);
+        this._sessionId = data.sessionId;
+        return data.sessionId;
     }
 
     private async _closeSession(): Promise<void> {

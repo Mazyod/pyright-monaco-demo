@@ -8,9 +8,16 @@ export async function endpointRequest(
     endpoint: string,
     body?: object
 ) {
-    return fetch(endpoint, {
+    const response = await fetch(endpoint, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: body ? JSON.stringify(body) : undefined,
     });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw data;
+    }
+
+    return data;
 }
