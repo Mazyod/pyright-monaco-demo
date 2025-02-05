@@ -12,7 +12,7 @@ import {
     SignatureHelp,
     WorkspaceEdit,
 } from 'vscode-languageserver-types';
-import { endpointDelete, endpointGet, endpointPost } from './EndpointUtils';
+import { endpointRequest } from './EndpointUtils';
 import { PlaygroundSettings } from './PlaygroundSettings';
 
 export interface HoverInfo {
@@ -60,7 +60,7 @@ export class LspSession {
 
     static async getPyrightServiceStatus(): Promise<ServerStatus> {
         const endpoint = appServerApiAddressPrefix + `status`;
-        return endpointGet(endpoint, {})
+        return endpointRequest('GET', endpoint)
             .then(async (response) => {
                 const data = await response.json();
                 if (!response.ok) {
@@ -76,7 +76,7 @@ export class LspSession {
     async getDiagnostics(code: string): Promise<Diagnostic[]> {
         return this._doWithSession<Diagnostic[]>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/diagnostics`;
-            return endpointPost(endpoint, {}, JSON.stringify({ code }))
+            return endpointRequest('POST', endpoint, { code })
                 .then(async (response) => {
                     const data = await response.json();
                     if (!response.ok) {
@@ -93,7 +93,7 @@ export class LspSession {
     async getHoverForPosition(code: string, position: Position): Promise<HoverInfo | undefined> {
         return this._doWithSession<HoverInfo>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/hover`;
-            return endpointPost(endpoint, {}, JSON.stringify({ code, position }))
+            return endpointRequest('POST', endpoint, { code, position })
                 .then(async (response) => {
                     const data = await response.json();
                     if (!response.ok) {
@@ -114,7 +114,7 @@ export class LspSession {
     ): Promise<WorkspaceEdit | undefined> {
         return this._doWithSession<WorkspaceEdit>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/rename`;
-            return endpointPost(endpoint, {}, JSON.stringify({ code, position, newName }))
+            return endpointRequest('POST', endpoint, { code, position, newName })
                 .then(async (response) => {
                     const data = await response.json();
                     if (!response.ok) {
@@ -134,7 +134,7 @@ export class LspSession {
     ): Promise<SignatureHelp | undefined> {
         return this._doWithSession<SignatureHelp>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/signature`;
-            return endpointPost(endpoint, {}, JSON.stringify({ code, position }))
+            return endpointRequest('POST', endpoint, { code, position })
                 .then(async (response) => {
                     const data = await response.json();
                     if (!response.ok) {
@@ -154,7 +154,7 @@ export class LspSession {
     ): Promise<CompletionList | undefined> {
         return this._doWithSession<CompletionList>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/completion`;
-            return endpointPost(endpoint, {}, JSON.stringify({ code, position }))
+            return endpointRequest('POST', endpoint, { code, position })
                 .then(async (response) => {
                     const data = await response.json();
                     if (!response.ok) {
@@ -171,7 +171,7 @@ export class LspSession {
     async resolveCompletionItem(item: CompletionItem): Promise<CompletionItem | undefined> {
         return this._doWithSession<CompletionItem>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/completionresolve`;
-            return endpointPost(endpoint, {}, JSON.stringify({ completionItem: item }))
+            return endpointRequest('POST', endpoint, { completionItem: item })
                 .then(async (response) => {
                     const data = await response.json();
                     if (!response.ok) {
@@ -249,7 +249,7 @@ export class LspSession {
         }
 
         const endpoint = appServerApiAddressPrefix + `session`;
-        const sessionId = await endpointPost(endpoint, {}, JSON.stringify(sessionOptions)).then(
+        const sessionId = await endpointRequest('POST', endpoint, sessionOptions).then(
             async (response) => {
                 const data = await response.json();
                 if (!response.ok) {
@@ -273,6 +273,6 @@ export class LspSession {
         this._sessionId = undefined;
 
         const endpoint = appServerApiAddressPrefix + `session/${sessionId}`;
-        await endpointDelete(endpoint, {});
+        await endpointRequest('DELETE', endpoint);
     }
 }

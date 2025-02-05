@@ -23,7 +23,6 @@ export interface RightPanelProps {
     latestPyrightVersion?: string;
     supportedPyrightVersions?: string[];
     code: string;
-    getShareableUrl: () => string;
 }
 const rightPanelWidth = 320;
 
