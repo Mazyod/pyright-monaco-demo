@@ -7,14 +7,11 @@ import * as icons from '@ant-design/icons-svg';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, ScrollView, StyleSheet, Text, View } from 'react-native';
 import IconButton from './IconButton';
-import { AboutPanel } from './AboutPanel';
 import { SettingsPanel } from './SettingsPanel';
 import { PlaygroundSettings } from './PlaygroundSettings';
 
 export enum RightPanelType {
-    About,
     Settings,
-    Share,
 }
 
 export interface RightPanelProps {
@@ -35,13 +32,6 @@ export function RightPanel(props: RightPanelProps) {
     let headerTitle = '';
 
     switch (props.rightPanelType) {
-        case RightPanelType.About:
-            panelContents = (
-                <AboutPanel code={props.code} getShareableUrl={props.getShareableUrl} />
-            );
-            headerTitle = 'About Pyright Playground';
-            break;
-
         case RightPanelType.Settings:
             panelContents = (
                 <SettingsPanel
@@ -52,11 +42,6 @@ export function RightPanel(props: RightPanelProps) {
                 />
             );
             headerTitle = 'Playground Settings';
-            break;
-
-        case RightPanelType.Share:
-            headerTitle = 'Share Link';
-            panelContents = <View />;
             break;
     }
 

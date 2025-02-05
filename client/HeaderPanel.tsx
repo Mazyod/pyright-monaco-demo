@@ -55,20 +55,6 @@ export function HeaderPanel(props: HeaderPanelProps) {
                         props.onShowRightPanel(RightPanelType.Settings);
                     }}
                 />
-                <IconButton
-                    iconDefinition={icons.QuestionCircleOutlined}
-                    iconSize={headerIconButtonSize}
-                    disabled={
-                        props.isRightPanelDisplayed && props.rightPanelType === RightPanelType.About
-                    }
-                    color={'#fff'}
-                    hoverColor={'#eee'}
-                    disableColor={'#669'}
-                    title={'About Pyright Playground'}
-                    onPress={() => {
-                        props.onShowRightPanel(RightPanelType.About);
-                    }}
-                />
             </View>
         </View>
     );
