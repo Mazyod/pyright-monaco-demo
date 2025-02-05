@@ -15,7 +15,6 @@ import { MonacoEditor } from './MonacoEditor';
 import { PlaygroundSettings } from './PlaygroundSettings';
 import { ProblemsPanel } from './ProblemsPanel';
 import { RightPanel, RightPanelType } from './RightPanel';
-import { getStateFromUrl } from './UrlUtils';
 
 const lspClient = new LspClient();
 
@@ -36,7 +35,7 @@ export interface AppState {
     isWaitingForResponse: boolean;
 }
 
-const initialState = getStateFromUrl() ?? getInitialStateFromLocalStorage();
+const initialState = getInitialStateFromLocalStorage();
 
 export default function App() {
     const editorRef = useRef(null);
