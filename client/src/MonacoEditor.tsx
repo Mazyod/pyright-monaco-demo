@@ -128,19 +128,17 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
     }, [props.diagnostics]);
 
     return (
-        <Box sx={styles.container}>
-            <Box sx={styles.editor}>
-                <Editor
-                    options={options}
-                    language={'python'}
-                    value={props.code}
-                    theme="vs"
-                    onChange={(value) => {
-                        value && props.onUpdateCode(value);
-                    }}
-                    onMount={handleEditorDidMount}
-                />
-            </Box>
+        <Box sx={styles.editor}>
+            <Editor
+                options={options}
+                language={'python'}
+                value={props.code}
+                theme="vs"
+                onChange={(value) => {
+                    value && props.onUpdateCode(value);
+                }}
+                onMount={handleEditorDidMount}
+            />
         </Box>
     );
 });
@@ -433,13 +431,8 @@ function getLspClientForModel(model: monaco.editor.ITextModel): LspClient | unde
 }
 
 const styles = {
-    container: {
+    editor: {
         flex: 1,
         py: 0.5,
-    },
-    editor: {
-        position: 'absolute',
-        height: '100%',
-        width: '100%',
     },
 };

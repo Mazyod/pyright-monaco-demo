@@ -1,80 +1,13 @@
-/* Add your custom styles below */
+:root {
+    color-scheme: light;
 
-/* SVG Icon styles */
-.svg-icon-container {
-    display: flex;
-    justify-content: center;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.svg-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Icon Button styles */
-.icon-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2px 6px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    transition: opacity 0.2s ease;
-}
-
-.icon-button:disabled {
-    cursor: default;
-    opacity: 1;
-}
-
-.icon-button:not(:disabled):hover {
-    opacity: 0.8;
-}
-
-/* Push Button styles */
-.push-button {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    border: 1px solid;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.push-button:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(102, 102, 153, 0.2);
-}
-
-.push-button-text {
-    display: block;
-    transition: color 0.2s ease;
-}
-
-/* Settings Checkbox styles */
-.settings-checkbox {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    transition: background-color 0.2s ease;
-}
-
-.settings-checkbox:focus {
-    outline: none;
-}
-
-.settings-checkbox:focus:not(:disabled) .settings-checkbox-box {
-    box-shadow: 0 0 0 2px rgba(102, 102, 153, 0.2);
-}
-
-.settings-checkbox-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.settings-checkbox-label {
-    transition: color 0.2s ease;
+/* Reset some default browser styles */
+body {
+    margin: 0;
 }

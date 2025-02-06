@@ -3,22 +3,12 @@
  * Header bar with embedded controls for the playground.
  */
 
-import * as icons from '@ant-design/icons-svg';
+import pyrightIcon from '@/assets/pyright.png';
 import { Box, Typography } from '@mui/material';
 import { Link } from '@mui/material';
-import IconButton from './IconButton';
-import { RightPanelType } from './RightPanel';
 
-const headerIconButtonSize = 20;
-
-export interface HeaderPanelProps {
-    isRightPanelDisplayed: boolean;
-    rightPanelType: RightPanelType;
-    onShowRightPanel: (rightPanelType?: RightPanelType) => void;
-}
-
-export function HeaderPanel(props: HeaderPanelProps) {
-    const image = <Box sx={styles.pyrightIcon} />;
+export function HeaderPanel() {
+    const image = <Box component="img" src={pyrightIcon} sx={styles.pyrightIcon} />;
 
     return (
         <Box sx={styles.container}>
@@ -33,23 +23,6 @@ export function HeaderPanel(props: HeaderPanelProps) {
             <Typography sx={styles.titleText} variant="h6">
                 Pyright Playground
             </Typography>
-            <Box sx={styles.controlsPanel}>
-                <IconButton
-                    iconDefinition={icons.SettingOutlined}
-                    iconSize={headerIconButtonSize}
-                    disabled={
-                        props.isRightPanelDisplayed &&
-                        props.rightPanelType === RightPanelType.Settings
-                    }
-                    color={'#fff'}
-                    hoverColor={'#eee'}
-                    disableColor={'#669'}
-                    title={'Playground settings'}
-                    onPress={() => {
-                        props.onShowRightPanel(RightPanelType.Settings);
-                    }}
-                />
-            </Box>
         </Box>
     );
 }
@@ -75,11 +48,5 @@ const styles = {
         fontSize: 18,
         fontWeight: 'bold',
         fontVariant: 'small-caps',
-    },
-    controlsPanel: {
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
     },
 };

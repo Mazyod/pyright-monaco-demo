@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, SxProps } from '@mui/material';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver-types';
 import { HeaderPanel } from './HeaderPanel';
 import { getInitialStateFromLocalStorage, setStateToLocalStorage } from './LocalStorageUtils';
@@ -13,7 +13,7 @@ import { LspSession } from './LspSession';
 import { MonacoEditor, MonacoEditorRef } from './MonacoEditor';
 import { PlaygroundSettings } from './PlaygroundSettings';
 import { ProblemsPanel } from './ProblemsPanel';
-import { RightPanel, RightPanelType } from './RightPanel';
+import { RightPanel } from './RightPanel';
 
 const lspClient = new LspClient();
 
@@ -27,10 +27,6 @@ export interface AppState {
     latestPyrightVersion?: string;
     supportedPyrightVersions?: string[];
 
-    isRightPanelDisplayed: boolean;
-    rightPanelType: RightPanelType;
-
-    isProblemsPanelDisplayed: boolean;
     isWaitingForResponse: boolean;
 }
 
@@ -46,9 +42,6 @@ export default function App() {
         },
         requestedPyrightVersion: false,
         diagnostics: [],
-        isRightPanelDisplayed: true,
-        rightPanelType: RightPanelType.Settings,
-        isProblemsPanelDisplayed: initialState.code !== '',
         isWaitingForResponse: false,
     });
 
@@ -63,8 +56,6 @@ export default function App() {
                 gotInitialState: true,
                 code: initialState.code,
                 settings: initialState.settings,
-                isProblemsPanelDisplayed:
-                    prevState.isProblemsPanelDisplayed || initialState.code !== '',
             }));
         }
     }, [appState.gotInitialState]);
@@ -146,21 +137,9 @@ export default function App() {
         },
     });
 
-    function onShowRightPanel(rightPanelType?: RightPanelType) {
-        setAppState((prevState) => ({
-            ...prevState,
-            rightPanelType: rightPanelType ?? prevState.rightPanelType,
-            isRightPanelDisplayed: rightPanelType !== undefined,
-        }));
-    }
-
     return (
         <Box sx={styles.container}>
-            <HeaderPanel
-                isRightPanelDisplayed={appState.isRightPanelDisplayed}
-                rightPanelType={appState.rightPanelType}
-                onShowRightPanel={onShowRightPanel}
-            />
+            <HeaderPanel />
             <Box sx={styles.middlePanelContainer}>
                 <MonacoEditor
                     ref={editorRef}
@@ -179,9 +158,6 @@ export default function App() {
                     }}
                 />
                 <RightPanel
-                    isRightPanelDisplayed={appState.isRightPanelDisplayed}
-                    rightPanelType={appState.rightPanelType}
-                    onShowRightPanel={onShowRightPanel}
                     settings={appState.settings}
                     latestPyrightVersion={appState.latestPyrightVersion}
                     supportedPyrightVersions={appState.supportedPyrightVersions}
@@ -201,15 +177,15 @@ export default function App() {
                         editorRef.current.selectRange(range);
                     }
                 }}
-                expandProblems={appState.isProblemsPanelDisplayed}
                 displayActivityIndicator={appState.isWaitingForResponse}
             />
         </Box>
     );
 }
 
-const styles = {
+const styles: Record<string, SxProps> = {
     container: {
+        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',

@@ -14,12 +14,10 @@ import { SvgIcon } from './SvgIcon';
 export interface ProblemsPanelProps {
     diagnostics: Diagnostic[];
     onSelectRange: (range: Range) => void;
-    expandProblems: boolean;
     displayActivityIndicator: boolean;
 }
 
 const problemsPanelHeight = 200;
-const problemsPanelHeightCollapsed = 32;
 
 export function ProblemsPanel(props: ProblemsPanelProps) {
     // We don't display hints in the problems panel.
@@ -34,32 +32,26 @@ export function ProblemsPanel(props: ProblemsPanelProps) {
             ref={containerRef}
             sx={{
                 ...styles.animatedContainer,
-                height: props.expandProblems ? problemsPanelHeight : problemsPanelHeightCollapsed,
+                height: problemsPanelHeight,
                 transition: 'height 250ms ease',
             }}
         >
             <Box sx={styles.container}>
                 <Box sx={styles.header}>
-                    {props.expandProblems && (
-                        <Box sx={styles.headerContents}>
-                            <Typography sx={styles.problemText}>
-                                Problems
+                    <Box sx={styles.headerContents}>
+                        <Typography sx={styles.problemText}>Problems</Typography>
+                        <Box sx={styles.problemCountBubble}>
+                            <Typography sx={styles.problemCountText}>
+                                {filteredDiagnostics.length.toString()}
                             </Typography>
-                            <Box sx={styles.problemCountBubble}>
-                                <Typography sx={styles.problemCountText}>
-                                    {filteredDiagnostics.length.toString()}
-                                </Typography>
-                            </Box>
-                            {props.displayActivityIndicator && (
-                                <Box sx={styles.activityContainer}>
-                                    <Typography sx={styles.waitingText}>
-                                        Waiting for server
-                                    </Typography>
-                                    <CircularProgress size={12} sx={{ color: '#fff' }} />
-                                </Box>
-                            )}
                         </Box>
-                    )}
+                        {props.displayActivityIndicator && (
+                            <Box sx={styles.activityContainer}>
+                                <Typography sx={styles.waitingText}>Waiting for server</Typography>
+                                <CircularProgress size={12} sx={{ color: '#fff' }} />
+                            </Box>
+                        )}
+                    </Box>
                 </Box>
                 <Box sx={styles.scrollContainer}>
                     {filteredDiagnostics.length > 0 ? (
@@ -85,10 +77,7 @@ function ProblemItem(props: { diagnostic: Diagnostic; onSelectRange: (range: Ran
     return (
         <ButtonBase
             ref={hoverRef}
-            sx={[
-                styles.diagnosticContainer,
-                isHovered && styles.problemContainerHover,
-            ]}
+            sx={[styles.diagnosticContainer, isHovered && styles.problemContainerHover]}
             onClick={() => {
                 props.onSelectRange(props.diagnostic.range);
             }}
@@ -115,9 +104,7 @@ function NoProblemsItem() {
     return (
         <Box sx={styles.diagnosticContainer}>
             <Box sx={styles.diagnosticTextContainer}>
-                <Typography sx={styles.diagnosticText}>
-                    No problems have been detected.
-                </Typography>
+                <Typography sx={styles.diagnosticText}>No problems have been detected.</Typography>
             </Box>
         </Box>
     );
