@@ -10,8 +10,6 @@ import { PlaygroundSettings } from './PlaygroundSettings';
 export interface RightPanelProps {
     settings: PlaygroundSettings;
     onUpdateSettings: (settings: PlaygroundSettings) => void;
-    latestPyrightVersion?: string;
-    supportedPyrightVersions?: string[];
     code: string;
 }
 
@@ -25,8 +23,6 @@ export function RightPanel(props: RightPanelProps) {
                 <SettingsPanel
                     settings={props.settings}
                     onUpdateSettings={props.onUpdateSettings}
-                    latestPyrightVersion={props.latestPyrightVersion}
-                    supportedPyrightVersions={props.supportedPyrightVersions}
                 />
             </Box>
         </Box>

@@ -9,7 +9,6 @@ import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver-types';
 import { HeaderPanel } from './HeaderPanel';
 import { getInitialStateFromLocalStorage, setStateToLocalStorage } from './LocalStorageUtils';
 import { LspClient } from './LspClient';
-import { LspSession } from './LspSession';
 import { MonacoEditor, MonacoEditorRef } from './MonacoEditor';
 import { PlaygroundSettings } from './PlaygroundSettings';
 import { ProblemsPanel } from './ProblemsPanel';
@@ -21,11 +20,7 @@ export interface AppState {
     gotInitialState: boolean;
     code: string;
     diagnostics: Diagnostic[];
-
     settings: PlaygroundSettings;
-    requestedPyrightVersion: boolean;
-    latestPyrightVersion?: string;
-    supportedPyrightVersions?: string[];
 
     isWaitingForResponse: boolean;
 }
@@ -40,7 +35,6 @@ export default function App() {
         settings: {
             configOverrides: {},
         },
-        requestedPyrightVersion: false,
         diagnostics: [],
         isWaitingForResponse: false,
     });
@@ -60,42 +54,16 @@ export default function App() {
         }
     }, [appState.gotInitialState]);
 
-    // Request general status, including supported versions of pyright
-    // from the service.
     useEffect(() => {
-        if (!appState.requestedPyrightVersion) {
-            setAppState((prevState) => ({
-                ...prevState,
-                requestedPyrightVersion: true,
-            }));
+        const handleKeyPress = (event: KeyboardEvent) => {
+            // Swallow command-s or ctrl-s to prevent browser save.
+            if (event.key === 's' && (event.ctrlKey || event.metaKey)) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        };
 
-            LspSession.getPyrightServiceStatus()
-                .then((status) => {
-                    const pyrightVersions = status.pyrightVersions;
-                    setAppState((prevState) => ({
-                        ...prevState,
-                        latestPyrightVersion:
-                            pyrightVersions.length > 0 ? pyrightVersions[0] : undefined,
-                        supportedPyrightVersions: pyrightVersions,
-                    }));
-                })
-                .catch(() => {
-                    // Ignore errors here.
-                });
-        }
-    });
-
-    const handleKeyPress = (event: KeyboardEvent) => {
-        // Swallow command-s or ctrl-s to prevent browser save.
-        if (event.key === 's' && (event.ctrlKey || event.metaKey)) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-    };
-
-    useEffect(() => {
         window.addEventListener('keydown', handleKeyPress);
-
         return () => window.removeEventListener('keydown', handleKeyPress);
     }, []);
 
@@ -159,8 +127,6 @@ export default function App() {
                 />
                 <RightPanel
                     settings={appState.settings}
-                    latestPyrightVersion={appState.latestPyrightVersion}
-                    supportedPyrightVersions={appState.supportedPyrightVersions}
                     onUpdateSettings={(settings: PlaygroundSettings) => {
                         setAppState((prevState) => ({
                             ...prevState,

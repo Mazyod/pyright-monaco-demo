@@ -24,8 +24,6 @@ interface ConfigOptionWithValue {
 
 export interface SettingsPanelProps {
     settings: PlaygroundSettings;
-    latestPyrightVersion?: string;
-    supportedPyrightVersions?: string[];
     onUpdateSettings: (settings: PlaygroundSettings) => void;
 }
 
@@ -125,9 +123,7 @@ function MenuButton(props: { onPress: () => void }) {
 function SettingsHeader(props: { headerText: string }) {
     return (
         <Box sx={styles.headerTextBox}>
-            <Typography sx={styles.headerText}>
-                {props.headerText}
-            </Typography>
+            <Typography sx={styles.headerText}>{props.headerText}</Typography>
         </Box>
     );
 }
