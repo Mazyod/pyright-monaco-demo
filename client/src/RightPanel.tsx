@@ -4,8 +4,8 @@
  */
 
 import * as icons from '@ant-design/icons-svg';
-import { useEffect, useRef } from 'react';
-import { Animated, Easing, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Box, Slide, Typography } from '@mui/material';
+import { useRef } from 'react';
 import IconButton from './IconButton';
 import { SettingsPanel } from './SettingsPanel';
 import { PlaygroundSettings } from './PlaygroundSettings';
@@ -24,6 +24,7 @@ export interface RightPanelProps {
     supportedPyrightVersions?: string[];
     code: string;
 }
+
 const rightPanelWidth = 320;
 
 export function RightPanel(props: RightPanelProps) {
@@ -44,70 +45,73 @@ export function RightPanel(props: RightPanelProps) {
             break;
     }
 
-    // Animate the appearance or disappearance of the right panel.
-    const widthAnimation = useRef(new Animated.Value(panelContents ? rightPanelWidth : 0)).current;
-
-    useEffect(() => {
-        Animated.timing(widthAnimation, {
-            toValue: props.isRightPanelDisplayed ? rightPanelWidth : 0,
-            duration: 250,
-            useNativeDriver: false,
-            easing: Easing.ease,
-        }).start();
-    }, [widthAnimation, props.isRightPanelDisplayed]);
+    const containerRef = useRef(null);
 
     return (
-        <Animated.View style={[styles.animatedContainer, { width: widthAnimation }]}>
-            <View style={styles.container}>
-                <View style={styles.headerContainer}>
-                    <Text style={styles.headerTitleText} selectable={false}>
-                        {headerTitle}
-                    </Text>
-                    <View style={styles.headerControlsContainer}>
-                        <IconButton
-                            iconDefinition={icons.CloseOutlined}
-                            iconSize={14}
-                            color={'#333'}
-                            hoverColor={'#000'}
-                            title={'Close panel'}
-                            onPress={() => {
-                                props.onShowRightPanel();
-                            }}
-                        />
-                    </View>
-                </View>
-                <ScrollView style={styles.contentContainer}>{panelContents}</ScrollView>
-            </View>
-        </Animated.View>
+        <Slide
+            direction="left"
+            in={props.isRightPanelDisplayed}
+            timeout={250}
+            mountOnEnter
+            unmountOnExit
+        >
+            <Box sx={styles.animatedContainer} ref={containerRef}>
+                <Box sx={styles.container}>
+                    <Box sx={styles.headerContainer}>
+                        <Typography sx={styles.headerTitleText}>
+                            {headerTitle}
+                        </Typography>
+                        <Box sx={styles.headerControlsContainer}>
+                            <IconButton
+                                iconDefinition={icons.CloseOutlined}
+                                iconSize={14}
+                                color={'#333'}
+                                hoverColor={'#000'}
+                                title={'Close panel'}
+                                onPress={() => {
+                                    props.onShowRightPanel();
+                                }}
+                            />
+                        </Box>
+                    </Box>
+                    <Box sx={styles.contentContainer}>
+                        {panelContents}
+                    </Box>
+                </Box>
+            </Box>
+        </Slide>
     );
 }
 
-const styles = StyleSheet.create({
+const styles = {
     animatedContainer: {
+        display: 'flex',
         flexDirection: 'row',
         position: 'relative',
+        width: rightPanelWidth,
     },
     container: {
         width: rightPanelWidth,
         alignSelf: 'stretch',
-        backgroundColor: '#f8f8ff',
+        bgcolor: '#f8f8ff',
     },
     contentContainer: {
         flexGrow: 1,
         flexShrink: 0,
         flexBasis: 0,
+        display: 'flex',
         flexDirection: 'column',
         alignSelf: 'stretch',
+        overflow: 'auto',
     },
     headerContainer: {
+        display: 'flex',
         flexDirection: 'row',
         height: 36,
         alignItems: 'center',
-        borderBottomWidth: 1,
-        borderStyle: 'solid',
-        borderColor: '#ddd',
-        paddingLeft: 12,
-        paddingRight: 4,
+        borderBottom: '1px solid #ddd',
+        pl: 1.5,
+        pr: 0.5,
     },
     headerTitleText: {
         color: '#333',
@@ -116,6 +120,7 @@ const styles = StyleSheet.create({
     },
     headerControlsContainer: {
         flex: 1,
+        display: 'flex',
         alignItems: 'flex-end',
     },
-});
+};

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) Eric Traut
  * Language server client that tracks local changes to the code and
@@ -30,7 +31,7 @@ export class LspClient {
     private _docContent = '';
     private _docVersion = 0;
     private _diagnosticsTimer: any;
-    private _notifications: LspClientNotifications;
+    private _notifications?: LspClientNotifications;
 
     requestNotification(notifications: LspClientNotifications) {
         this._notifications = notifications;
@@ -51,7 +52,7 @@ export class LspClient {
         this._restartDiagnosticsTimer();
     }
 
-    async getHoverForPosition(code: string, position: Position): Promise<HoverInfo | undefined> {
+    async getHoverForPosition(code: string, position: Position): Promise<HoverInfo> {
         return this._lspSession.getHoverForPosition(code, position);
     }
 
@@ -63,10 +64,7 @@ export class LspClient {
         return this._lspSession.getRenameEditsForPosition(code, position, newName);
     }
 
-    async getSignatureHelpForPosition(
-        code: string,
-        position: Position
-    ): Promise<SignatureHelp | undefined> {
+    async getSignatureHelpForPosition(code: string, position: Position): Promise<SignatureHelp> {
         return this._lspSession.getSignatureHelpForPosition(code, position);
     }
 
@@ -96,33 +94,21 @@ export class LspClient {
     }
 
     private _requestDiagnostics() {
-        let docVersion = this._docVersion;
+        const docVersion = this._docVersion;
 
-        if (this._notifications.onWaitingForDiagnostics) {
-            this._notifications.onWaitingForDiagnostics(true);
-        }
+        this._notifications?.onWaitingForDiagnostics?.(true);
 
         this._lspSession
             .getDiagnostics(this._docContent)
             .then((diagnostics) => {
                 if (this._docVersion === docVersion) {
-                    if (this._notifications.onWaitingForDiagnostics) {
-                        this._notifications.onWaitingForDiagnostics(false);
-                    }
-
-                    if (this._notifications.onDiagnostics) {
-                        this._notifications.onDiagnostics(diagnostics);
-                    }
+                    this._notifications?.onWaitingForDiagnostics?.(false);
+                    this._notifications?.onDiagnostics?.(diagnostics);
                 }
             })
             .catch((err) => {
-                if (this._notifications.onWaitingForDiagnostics) {
-                    this._notifications.onWaitingForDiagnostics(false);
-                }
-
-                if (this._notifications.onError) {
-                    this._notifications.onError(err.message);
-                }
+                this._notifications?.onWaitingForDiagnostics?.(false);
+                this._notifications?.onError?.(err.message);
             });
     }
 }

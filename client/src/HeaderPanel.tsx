@@ -4,8 +4,8 @@
  */
 
 import * as icons from '@ant-design/icons-svg';
-import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useAssets } from 'expo-asset';
+import { Box, Typography } from '@mui/material';
+import { Link } from '@mui/material';
 import IconButton from './IconButton';
 import { RightPanelType } from './RightPanel';
 
@@ -18,28 +18,22 @@ export interface HeaderPanelProps {
 }
 
 export function HeaderPanel(props: HeaderPanelProps) {
-    const [assets, error] = useAssets([require('./assets/pyright_bw.png')]);
-
-    let image = null;
-    if (!error && assets) {
-        image = <Image style={styles.pyrightIcon} source={assets[0]} />;
-    } else {
-        image = <View style={styles.pyrightIcon} />;
-    }
+    const image = <Box sx={styles.pyrightIcon} />;
 
     return (
-        <View style={styles.container}>
-            <Pressable
-                onPress={() => {
-                    Linking.openURL('https://github.com/microsoft/pyright');
-                }}
+        <Box sx={styles.container}>
+            <Link
+                href="https://github.com/microsoft/pyright"
+                target="_blank"
+                rel="noopener"
+                sx={{ display: 'flex' }}
             >
                 {image}
-            </Pressable>
-            <Text style={styles.titleText} selectable={false}>
+            </Link>
+            <Typography sx={styles.titleText} variant="h6">
                 Pyright Playground
-            </Text>
-            <View style={styles.controlsPanel}>
+            </Typography>
+            <Box sx={styles.controlsPanel}>
                 <IconButton
                     iconDefinition={icons.SettingOutlined}
                     iconSize={headerIconButtonSize}
@@ -55,36 +49,37 @@ export function HeaderPanel(props: HeaderPanelProps) {
                         props.onShowRightPanel(RightPanelType.Settings);
                     }}
                 />
-            </View>
-        </View>
+            </Box>
+        </Box>
     );
 }
 
-const styles = StyleSheet.create({
+const styles = {
     container: {
-        flex: -1,
+        display: 'flex',
         flexDirection: 'row',
-        paddingHorizontal: 8,
-        paddingBottom: 2,
+        px: 1,
+        pb: 0.25,
         alignSelf: 'stretch',
         alignItems: 'center',
-        backgroundColor: '#336',
+        bgcolor: '#336',
         height: 42,
     },
     pyrightIcon: {
         height: 24,
         width: 24,
-        marginRight: 8,
+        mr: 1,
     },
     titleText: {
         color: '#fff',
         fontSize: 18,
         fontWeight: 'bold',
-        fontVariant: ['small-caps'],
+        fontVariant: 'small-caps',
     },
     controlsPanel: {
         flex: 1,
+        display: 'flex',
         flexDirection: 'row',
         justifyContent: 'flex-end',
     },
-});
+};

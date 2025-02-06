@@ -43,5 +43,7 @@ function setLocalStorageItem(key: string, value: string | undefined) {
         } else {
             localStorage.setItem(key, value);
         }
-    } catch {}
+    } catch {
+        // Fall through.
+    }
 }

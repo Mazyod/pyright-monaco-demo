@@ -5,7 +5,6 @@
 
 import { renderIconDefinitionToSVGElement } from '@ant-design/icons-svg/es/helpers';
 import { IconDefinition } from '@ant-design/icons-svg/lib/types';
-import { StyleSheet, View } from 'react-native';
 
 export interface SvgIconProps {
     iconDefinition: IconDefinition;
@@ -23,35 +22,27 @@ export function SvgIcon(props: SvgIconProps) {
     });
 
     return (
-        <View style={styles.container}>
+        <div className="svg-icon-container">
             <div
+                className="svg-icon"
                 style={{
-                    display: 'flex',
                     height: props.iconSize,
                     width: props.iconSize,
-                    ...styles.iconContainer,
                 }}
                 dangerouslySetInnerHTML={{ __html: svgElement }}
             />
-        </View>
+        </div>
     );
 }
 
-const styles = StyleSheet.create({
-    defaultBackgroundStyle: {
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-    },
-    container: {
-        flex: -1,
-        justifyContent: 'center',
-    },
-    iconContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    disabled: {
-        opacity: 1,
-        cursor: 'default',
-    },
-});
+// CSS classes should be defined in your CSS file:
+// .svg-icon-container {
+//     display: flex;
+//     justify-content: center;
+// }
+// 
+// .svg-icon {
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+// }

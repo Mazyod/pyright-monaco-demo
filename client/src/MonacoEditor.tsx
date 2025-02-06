@@ -4,10 +4,10 @@
  * handles language server interactions, the display of errors, etc.
  */
 
-import Editor, { loader } from '@monaco-editor/react';
+import Editor, { loader, Monaco } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { ForwardedRef, forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Box } from '@mui/material';
 import {
     CompletionItem,
     CompletionItemKind,
@@ -86,12 +86,12 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
     props: MonacoEditorProps,
     ref: ForwardedRef<MonacoEditorRef>
 ) {
-    const editorRef = useRef(null);
-    const monacoRef = useRef(null);
+    const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
+    const monacoRef = useRef<Monaco>();
 
     function handleEditorDidMount(
         editor: monaco.editor.IStandaloneCodeEditor,
-        monacoInstance: any
+        monacoInstance: Monaco
     ) {
         editorRef.current = editor;
         monacoRef.current = monacoInstance;
@@ -102,13 +102,10 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
     useImperativeHandle(ref, () => {
         return {
             focus: () => {
-                const editor: monaco.editor.IStandaloneCodeEditor = editorRef.current;
-                if (editor) {
-                    editor.focus();
-                }
+                editorRef.current?.focus();
             },
             selectRange: (range: Range) => {
-                const editor: monaco.editor.IStandaloneCodeEditor = editorRef.current;
+                const editor = editorRef.current;
                 if (editor) {
                     const monacoRange = convertRange(range);
                     editor.setSelection(monacoRange);
@@ -120,30 +117,31 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
 
     useEffect(() => {
         if (monacoRef?.current && editorRef?.current) {
-            const model: monaco.editor.ITextModel = editorRef.current.getModel();
-            setFileMarkers(monacoRef.current, model, props.diagnostics);
-
-            // Register the editor and the LSP Client so they can be accessed
-            // by the hover provider, etc.
-            registerModel(model, props.lspClient);
+            const model = editorRef.current.getModel();
+            if (model) {
+                setFileMarkers(monacoRef.current, model, props.diagnostics);
+                // Register the editor and the LSP Client so they can be accessed
+                // by the hover provider, etc.
+                registerModel(model, props.lspClient);
+            }
         }
     }, [props.diagnostics]);
 
     return (
-        <View style={styles.container}>
-            <View style={styles.editor}>
+        <Box sx={styles.container}>
+            <Box sx={styles.editor}>
                 <Editor
                     options={options}
                     language={'python'}
                     value={props.code}
                     theme="vs"
                     onChange={(value) => {
-                        props.onUpdateCode(value);
+                        value && props.onUpdateCode(value);
                     }}
                     onMount={handleEditorDidMount}
                 />
-            </View>
-        </View>
+            </Box>
+        </Box>
     );
 });
 
@@ -157,7 +155,7 @@ function setFileMarkers(
     diagnostics.forEach((diag) => {
         const markerData: monaco.editor.IMarkerData = {
             ...convertRange(diag.range),
-            severity: convertSeverity(diag.severity),
+            severity: convertSeverity(diag.severity ?? DiagnosticSeverity.Hint),
             message: diag.message,
         };
 
@@ -199,7 +197,7 @@ function convertRange(range: Range): monaco.IRange {
 async function handleHoverRequest(
     model: monaco.editor.ITextModel,
     position: monaco.Position
-): Promise<monaco.languages.Hover> {
+): Promise<monaco.languages.Hover | null> {
     const lspClient = getLspClientForModel(model);
     if (!lspClient) {
         return null;
@@ -228,7 +226,7 @@ async function handleRenameRequest(
     model: monaco.editor.ITextModel,
     position: monaco.Position,
     newName: string
-): Promise<monaco.languages.WorkspaceEdit> {
+): Promise<monaco.languages.WorkspaceEdit | null> {
     const lspClient = getLspClientForModel(model);
     if (!lspClient) {
         return null;
@@ -272,7 +270,7 @@ async function handleRenameRequest(
 async function handleSignatureHelpRequest(
     model: monaco.editor.ITextModel,
     position: monaco.Position
-): Promise<monaco.languages.SignatureHelpResult> {
+): Promise<monaco.languages.SignatureHelpResult | null> {
     const lspClient = getLspClientForModel(model);
     if (!lspClient) {
         return null;
@@ -287,12 +285,7 @@ async function handleSignatureHelpRequest(
         return {
             value: {
                 signatures: sigInfo.signatures.map((sig) => {
-                    return {
-                        label: sig.label,
-                        documentation: sig.documentation,
-                        parameters: sig.parameters,
-                        activeParameter: sig.activeParameter,
-                    };
+                    return { ...sig };
                 }),
                 activeSignature: sigInfo.activeSignature ?? 0,
                 activeParameter: sigInfo.activeParameter,
@@ -439,14 +432,14 @@ function getLspClientForModel(model: monaco.editor.ITextModel): LspClient | unde
     return registeredModels.find((m) => m.model === model)?.lspClient;
 }
 
-const styles = StyleSheet.create({
+const styles = {
     container: {
         flex: 1,
-        paddingVertical: 4,
+        py: 0.5,
     },
     editor: {
         position: 'absolute',
         height: '100%',
         width: '100%',
     },
-});
+};

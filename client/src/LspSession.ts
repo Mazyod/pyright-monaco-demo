@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) Eric Traut
  * Handles the state associated with a remote language server session.
@@ -72,7 +73,7 @@ export class LspSession {
         });
     }
 
-    async getHoverForPosition(code: string, position: Position): Promise<HoverInfo | undefined> {
+    async getHoverForPosition(code: string, position: Position): Promise<HoverInfo> {
         return this._doWithSession<HoverInfo>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/hover`;
             const data = await endpointRequest('POST', endpoint, { code, position });
@@ -92,10 +93,7 @@ export class LspSession {
         });
     }
 
-    async getSignatureHelpForPosition(
-        code: string,
-        position: Position
-    ): Promise<SignatureHelp | undefined> {
+    async getSignatureHelpForPosition(code: string, position: Position): Promise<SignatureHelp> {
         return this._doWithSession<SignatureHelp>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/signature`;
             const data = await endpointRequest('POST', endpoint, { code, position });
@@ -139,7 +137,7 @@ export class LspSession {
                 const result = await callback(sessionId);
 
                 return result;
-            } catch (err) {
+            } catch {
                 // Throw away the current session.
                 this._sessionId = undefined;
                 errorCount++;

@@ -4,8 +4,8 @@
  */
 
 import * as icons from '@ant-design/icons-svg';
+import { Box, Typography } from '@mui/material';
 import { useRef } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
 import { CheckmarkMenu, CheckmarkMenuItem } from './CheckmarkMenu';
 import IconButton from './IconButton';
 import { Menu, MenuRef } from './Menu';
@@ -32,14 +32,10 @@ export interface SettingsPanelProps {
 
 export function SettingsPanel(props: SettingsPanelProps) {
     const configOptionsMenuRef = useRef<MenuRef>(null);
-    const pyrightVersionMenuRef = useRef<MenuRef>(null);
-    const pythonVersionMenuRef = useRef<MenuRef>(null);
-    const pythonPlatformMenuRef = useRef<MenuRef>(null);
-    const localeMenuRef = useRef<MenuRef>(null);
     const configOverrides = getNonDefaultConfigOptions(props.settings);
 
     return (
-        <View style={styles.container}>
+        <Box sx={styles.container}>
             <SettingsHeader headerText={'Configuration Options'} />
             <SettingsCheckbox
                 key={'strict'}
@@ -55,10 +51,10 @@ export function SettingsPanel(props: SettingsPanelProps) {
                 }}
             />
 
-            <View style={styles.selectionContainer}>
-                <Text style={styles.selectedOptionText} selectable={false}>
+            <Box sx={styles.selectionContainer}>
+                <Typography sx={styles.selectedOptionText}>
                     {configOverrides.length === 0 ? 'Default' : 'Custom'}
-                </Text>
+                </Typography>
                 <MenuButton
                     onPress={() => {
                         configOptionsMenuRef.current?.open();
@@ -79,130 +75,27 @@ export function SettingsPanel(props: SettingsPanelProps) {
                         }}
                     />
                 </Menu>
-            </View>
-            <View style={styles.overridesContainer}>
-                {configOverrides.map((config) => {
-                    return (
-                        <ConfigOverride
-                            key={config.name}
-                            config={config}
-                            onRemove={() => {
-                                const configOverrides = { ...props.settings.configOverrides };
-                                delete configOverrides[config.name];
+            </Box>
+            <Box sx={styles.overridesContainer}>
+                {configOverrides.map((config) => (
+                    <ConfigOverride
+                        key={config.name}
+                        config={config}
+                        onRemove={() => {
+                            const configOverrides = { ...props.settings.configOverrides };
+                            delete configOverrides[config.name];
 
-                                props.onUpdateSettings({
-                                    ...props.settings,
-                                    configOverrides,
-                                });
-                            }}
-                        />
-                    );
-                })}
-            </View>
-
-            <SettingsDivider />
-            <SettingsHeader headerText={'Pyright Version'} />
-            <View style={styles.selectionContainer}>
-                <Text style={styles.selectedOptionText} selectable={false}>
-                    {props.settings.pyrightVersion ||
-                        (props.latestPyrightVersion
-                            ? `Latest (${props.latestPyrightVersion})`
-                            : 'Latest')}
-                </Text>
-                <MenuButton
-                    onPress={() => {
-                        pyrightVersionMenuRef.current?.open();
-                    }}
-                />
-                <Menu name={'pyrightVersion'} ref={pyrightVersionMenuRef}>
-                    <CheckmarkMenu
-                        items={['Latest', ...(props.supportedPyrightVersions ?? [])].map((item) => {
-                            return {
-                                label: item,
-                                checked: item === (props.settings.pyrightVersion ?? 'Latest'),
-                            };
-                        })}
-                        onSelect={(item, index) => {
                             props.onUpdateSettings({
                                 ...props.settings,
-                                pyrightVersion: index > 0 ? item.label : undefined,
+                                configOverrides,
                             });
                         }}
                     />
-                </Menu>
-            </View>
+                ))}
+            </Box>
 
             <SettingsDivider />
-            <SettingsHeader headerText={'Python Version'} />
-            <View style={styles.selectionContainer}>
-                <Text style={styles.selectedOptionText} selectable={false}>
-                    {props.settings.pythonVersion || 'Default (3.13)'}
-                </Text>
-                <MenuButton
-                    onPress={() => {
-                        pythonVersionMenuRef.current?.open();
-                    }}
-                />
-                <Menu name={'pythonVersion'} ref={pythonVersionMenuRef}>
-                    <CheckmarkMenu
-                        items={[
-                            'Default',
-                            '3.14',
-                            '3.13',
-                            '3.12',
-                            '3.11',
-                            '3.10',
-                            '3.9',
-                            '3.8',
-                            '3.7',
-                            '3.6',
-                        ].map((item) => {
-                            return {
-                                label: item,
-                                checked: item === (props.settings.pythonVersion ?? 'Default'),
-                            };
-                        })}
-                        onSelect={(item, index) => {
-                            props.onUpdateSettings({
-                                ...props.settings,
-                                pythonVersion: index > 0 ? item.label : undefined,
-                            });
-                        }}
-                    />
-                </Menu>
-            </View>
-
-            <SettingsDivider />
-            <SettingsHeader headerText={'Python Platform'} />
-            <View style={styles.selectionContainer}>
-                <Text style={styles.selectedOptionText} selectable={false}>
-                    {props.settings.pythonPlatform || 'Default (All)'}
-                </Text>
-                <MenuButton
-                    onPress={() => {
-                        pythonPlatformMenuRef.current?.open();
-                    }}
-                />
-                <Menu name={'pythonPlatform'} ref={pythonPlatformMenuRef}>
-                    <CheckmarkMenu
-                        items={['All', 'Linux', 'Darwin', 'Windows'].map((item) => {
-                            return {
-                                label: item,
-                                checked: item === (props.settings.pythonPlatform ?? 'All'),
-                            };
-                        })}
-                        onSelect={(item, index) => {
-                            props.onUpdateSettings({
-                                ...props.settings,
-                                pythonPlatform: index > 0 ? item.label : undefined,
-                            });
-                        }}
-                    />
-                </Menu>
-            </View>
-
-            <SettingsDivider />
-            <View style={styles.resetButtonContainer}>
+            <Box sx={styles.resetButtonContainer}>
                 <PushButton
                     label={'Restore Defaults'}
                     title={'Reset all settings to their default values'}
@@ -213,8 +106,8 @@ export function SettingsPanel(props: SettingsPanelProps) {
                         });
                     }}
                 />
-            </View>
-        </View>
+            </Box>
+        </Box>
     );
 }
 
@@ -232,16 +125,16 @@ function MenuButton(props: { onPress: () => void }) {
 
 function SettingsHeader(props: { headerText: string }) {
     return (
-        <View style={styles.headerTextBox}>
-            <Text style={styles.headerText} selectable={false}>
+        <Box sx={styles.headerTextBox}>
+            <Typography sx={styles.headerText}>
                 {props.headerText}
-            </Text>
-        </View>
+            </Typography>
+        </Box>
     );
 }
 
 function SettingsDivider() {
-    return <View style={styles.divider} />;
+    return <Box sx={styles.divider} />;
 }
 
 interface ConfigOverrideProps {
@@ -253,11 +146,11 @@ function ConfigOverride(props: ConfigOverrideProps) {
     const text = `${props.config.name}=${props.config.value.toString()}`;
 
     return (
-        <View style={styles.configOverrideContainer}>
-            <Text style={styles.configOverrideText} selectable={false} numberOfLines={1}>
+        <Box sx={styles.configOverrideContainer}>
+            <Typography sx={styles.configOverrideText} noWrap>
                 {text}
-            </Text>
-            <View style={{ marginTop: -4 }}>
+            </Typography>
+            <Box sx={{ mt: -0.5 }}>
                 <IconButton
                     iconDefinition={icons.CloseOutlined}
                     iconSize={12}
@@ -265,8 +158,8 @@ function ConfigOverride(props: ConfigOverrideProps) {
                     hoverColor="#333"
                     onPress={props.onRemove}
                 />
-            </View>
-        </View>
+            </Box>
+        </Box>
     );
 }
 
@@ -310,7 +203,7 @@ function getConfigOptionMenuItem(
 
     return {
         label: config.name,
-        checked: isEnabled || (config.isEnabledInStrict && settings.strictMode),
+        checked: isEnabled || (config.isEnabledInStrict && !!settings.strictMode),
         disabled: config.isEnabledInStrict && settings.strictMode,
         title: config.description,
     };
@@ -333,39 +226,39 @@ function toggleConfigOption(settings: PlaygroundSettings, optionName: string): P
     return { ...settings, configOverrides };
 }
 
-const styles = StyleSheet.create({
+const styles = {
     container: {
         flex: 1,
+        display: 'flex',
         flexDirection: 'column',
         alignSelf: 'stretch',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
+        py: 1,
+        px: 1.5,
     },
     divider: {
         height: 1,
-        borderTopWidth: 1,
-        borderColor: '#eee',
-        borderStyle: 'solid',
-        marginVertical: 8,
+        borderTop: '1px solid #eee',
+        my: 1,
     },
     headerTextBox: {
-        marginBottom: 4,
+        mb: 0.5,
     },
     headerText: {
         fontSize: 14,
         color: '#666',
-        fontVariant: ['small-caps'],
+        fontVariant: 'small-caps',
     },
     resetButtonContainer: {
         alignSelf: 'center',
-        marginTop: 4,
-        marginHorizontal: 8,
+        mt: 0.5,
+        mx: 1,
     },
     selectionContainer: {
         height: 24,
-        paddingTop: 6,
-        paddingBottom: 2,
-        paddingHorizontal: 16,
+        pt: 0.75,
+        pb: 0.25,
+        px: 2,
+        display: 'flex',
         alignItems: 'center',
         flexDirection: 'row',
     },
@@ -375,20 +268,22 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     overridesContainer: {
+        display: 'flex',
         flexDirection: 'column',
-        marginTop: 4,
+        mt: 0.5,
     },
     configOverrideContainer: {
+        display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginLeft: 16,
-        paddingHorizontal: 16,
-        paddingVertical: 4,
+        ml: 2,
+        px: 2,
+        py: 0.5,
     },
     configOverrideText: {
         flex: -1,
         fontSize: 12,
         color: '#333',
     },
-});
+};
