@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) Eric Traut
  * A menu that displays a checkmark next to items.
