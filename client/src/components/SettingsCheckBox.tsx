@@ -4,7 +4,7 @@
  */
 
 import { Box, ButtonBase, Typography } from '@mui/material';
-import { useHover } from './HoverHook';
+import { useHover } from '../services/HoverHook';
 import { MuiIcon } from './MuiIcon';
 
 export interface SettingsCheckboxProps {

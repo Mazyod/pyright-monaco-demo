@@ -5,7 +5,7 @@
 
 import { Box, IconButton as MuiIconButton } from '@mui/material';
 import { MouseEvent } from 'react';
-import { useHover } from './HoverHook';
+import { useHover } from '../services/HoverHook';
 import { IconName, MuiIcon } from './MuiIcon';
 
 interface IconButtonProps {

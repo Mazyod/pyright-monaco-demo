@@ -6,13 +6,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Box, SxProps } from '@mui/material';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver-types';
-import { HeaderPanel } from './HeaderPanel';
-import { getInitialStateFromLocalStorage, setStateToLocalStorage } from './LocalStorageUtils';
-import { LspClient } from './LspClient';
-import { MonacoEditor, MonacoEditorRef } from './MonacoEditor';
-import { PlaygroundSettings } from './PlaygroundSettings';
-import { ProblemsPanel } from './ProblemsPanel';
-import { RightPanel } from './RightPanel';
+import { HeaderPanel } from './components/HeaderPanel';
+import { getInitialStateFromLocalStorage, setStateToLocalStorage } from './services/LocalStorageUtils';
+import { LspClient } from './services/LspClient';
+import { MonacoEditor, MonacoEditorRef } from './components/MonacoEditor';
+import { PlaygroundSettings } from './components/PlaygroundSettings';
+import { ProblemsPanel } from './components/ProblemsPanel';
+import { RightPanel } from './components/RightPanel';
 
 const lspClient = new LspClient();
 

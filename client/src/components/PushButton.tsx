@@ -5,7 +5,7 @@
 
 import { Box, Button, Typography } from '@mui/material';
 import { MouseEvent } from 'react';
-import { useHover } from './HoverHook';
+import { useHover } from '../services/HoverHook';
 
 interface PushButtonProps {
     label: string;

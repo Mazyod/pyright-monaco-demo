@@ -14,7 +14,7 @@ import type {
     WorkspaceEdit,
 } from 'vscode-languageserver-types';
 import { HoverInfo, LspSession } from './LspSession';
-import { PlaygroundSettings } from './PlaygroundSettings';
+import { PlaygroundSettings } from '../components/PlaygroundSettings';
 
 // Wait for a small amount before sending the request to the server. This allows
 // the user to type multiple characters before we send the request.

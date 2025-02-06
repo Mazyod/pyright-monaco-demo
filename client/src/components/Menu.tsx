@@ -5,7 +5,7 @@
 
 import { Box, Menu as MuiMenu, MenuItem as MuiMenuItem, Typography } from '@mui/material';
 import React, { ForwardedRef, forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { useHover } from './HoverHook';
+import { useHover } from '../services/HoverHook';
 import { IconName, MuiIcon } from './MuiIcon';
 
 export const menuIconColor = '#669';
@@ -78,7 +78,7 @@ export function MenuItem(props: MenuItemProps) {
     const [hoverRef, isHovered] = useHover();
 
     // If there's a label filter, see if we can find it in the label.
-    const filterOffset = props.labelFilterText 
+    const filterOffset = props.labelFilterText
         ? props.label.toLowerCase().indexOf(props.labelFilterText.toLowerCase())
         : -1;
 
@@ -96,7 +96,9 @@ export function MenuItem(props: MenuItemProps) {
             filterOffset,
             filterOffset + (props.labelFilterText?.length ?? 0)
         );
-        const afterText = props.label.substring(filterOffset + (props.labelFilterText?.length ?? 0));
+        const afterText = props.label.substring(
+            filterOffset + (props.labelFilterText?.length ?? 0)
+        );
 
         labelItem = (
             <Typography sx={styles.labelText} noWrap>
@@ -117,18 +119,12 @@ export function MenuItem(props: MenuItemProps) {
             ref={hoverRef}
             sx={{
                 ...styles.container,
-                ...(props.focused || isHovered) && !props.disabled ? styles.focused : {},
-                ...props.disabled ? styles.disabled : {},
+                ...((props.focused || isHovered) && !props.disabled ? styles.focused : {}),
+                ...(props.disabled ? styles.disabled : {}),
             }}
         >
             <Box sx={styles.iconContainer}>
-                {props.icon && (
-                    <MuiIcon
-                        name={props.icon}
-                        size={14}
-                        color={menuIconColor}
-                    />
-                )}
+                {props.icon && <MuiIcon name={props.icon} size={14} color={menuIconColor} />}
             </Box>
             {labelItem}
         </MuiMenuItem>

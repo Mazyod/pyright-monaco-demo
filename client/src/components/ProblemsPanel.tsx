@@ -6,7 +6,7 @@
 import { Box, ButtonBase, CircularProgress, Typography } from '@mui/material';
 import { useRef } from 'react';
 import { Diagnostic, DiagnosticSeverity, Range } from 'vscode-languageserver-types';
-import { useHover } from './HoverHook';
+import { useHover } from '../services/HoverHook';
 import { IconName, MuiIcon } from './MuiIcon';
 
 export interface ProblemsPanelProps {
