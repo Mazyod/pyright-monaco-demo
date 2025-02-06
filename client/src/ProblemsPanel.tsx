@@ -61,7 +61,9 @@ export function ProblemsPanel(props: ProblemsPanelProps) {
                             />
                         ))
                     ) : (
-                        <NoProblemsItem />
+                        <Typography sx={styles.diagnosticText}>
+                            No problems have been detected.
+                        </Typography>
                     )}
                 </Box>
             </Box>
@@ -95,16 +97,6 @@ function ProblemItem(props: { diagnostic: Diagnostic; onSelectRange: (range: Ran
                 </Typography>
             </Box>
         </ButtonBase>
-    );
-}
-
-function NoProblemsItem() {
-    return (
-        <Box sx={styles.diagnosticContainer}>
-            <Box sx={styles.diagnosticTextContainer}>
-                <Typography sx={styles.diagnosticText}>No problems have been detected.</Typography>
-            </Box>
-        </Box>
     );
 }
 
@@ -211,6 +203,7 @@ const styles = {
         flexDirection: 'column',
     },
     diagnosticText: {
+        m: 1,
         fontSize: 13,
         lineHeight: '16px',
     },
