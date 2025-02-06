@@ -5,7 +5,7 @@
 
 import { Box, Menu as MuiMenu, MenuItem as MuiMenuItem, Typography } from '@mui/material';
 import React, { ForwardedRef, forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { useHover } from '../services/HoverHook';
+import { useHover } from '@/services/HoverHook';
 import { IconName, MuiIcon } from './MuiIcon';
 
 export const menuIconColor = '#669';

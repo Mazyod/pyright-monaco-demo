@@ -17,7 +17,7 @@ import {
     Range,
     TextDocumentEdit,
 } from 'vscode-languageserver-types';
-import { LspClient } from '../services/LspClient';
+import { LspClient } from '@/services/LspClient';
 
 interface ExtendedCompletionItem extends monaco.languages.CompletionItem {
     originalLspItem: CompletionItem;
