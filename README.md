@@ -1,5 +1,9 @@
 # Pyright Playground
 
+> [!IMPORTANT]
+> This fork of Pyright Playground is focused on reducing the code an, making it easier to understand the key parts.
+> It removes the dynamic Pyright download, switching versions, `react-native`, etc.
+
 [Pyright Playground](https://pyright-play.net) provides a web experience for running Pyright.
 
 [Pyright](https://github.com/Microsoft/pyright) is a static type checker for Python.
