@@ -21,7 +21,7 @@ export function HeaderPanel() {
                 {image}
             </Link>
             <Typography sx={styles.titleText} variant="h6">
-                Pyright Playground
+                Pyright Monaco Demo
             </Typography>
         </Box>
     );

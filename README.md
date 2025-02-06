@@ -1,4 +1,6 @@
-# About this Fork
+# Pyright Monaco Demo
+
+## About this Fork
 
 > [!IMPORTANT]
 > This fork of Pyright Playground is focused on reducing the code an, making it easier to understand the key parts.
@@ -6,11 +8,9 @@
 
 ![image](https://github.com/user-attachments/assets/bbaa6d85-6ceb-46c8-85b4-fb73f68298f9)
 
-# Pyright Playground
+[Pyright](https://github.com/Microsoft/pyright) is a static type checker for Python.
 
 [Pyright Playground](https://pyright-play.net) provides a web experience for running Pyright.
-
-[Pyright](https://github.com/Microsoft/pyright) is a static type checker for Python.
 
 ## Community
 
