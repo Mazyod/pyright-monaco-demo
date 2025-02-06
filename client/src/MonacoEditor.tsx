@@ -19,6 +19,11 @@ import {
 } from 'vscode-languageserver-types';
 import { LspClient } from './LspClient';
 
+interface ExtendedCompletionItem extends monaco.languages.CompletionItem {
+    originalLspItem: CompletionItem;
+    sourceModel: monaco.editor.ITextModel;
+}
+
 loader
     .init()
     .then((monaco) => {
@@ -281,10 +286,15 @@ async function handleSignatureHelpRequest(
         return {
             value: {
                 signatures: sigInfo.signatures.map((sig) => {
-                    return { ...sig };
+                    return {
+                        label: sig.label,
+                        documentation: sig.documentation,
+                        parameters: sig.parameters ?? [],
+                        activeParameter: sig.activeParameter,
+                    };
                 }),
                 activeSignature: sigInfo.activeSignature ?? 0,
-                activeParameter: sigInfo.activeParameter,
+                activeParameter: sigInfo.activeParameter ?? 0,
             },
             dispose: () => {},
         };
@@ -323,20 +333,18 @@ async function handleProvideCompletionRequest(
 async function handleResolveCompletionRequest(
     item: monaco.languages.CompletionItem
 ): Promise<monaco.languages.CompletionItem | null> {
-    const model = (item as any).model as monaco.editor.ITextModel | undefined;
-    const original = (item as any).__original as CompletionItem | undefined;
-    if (!model || !original) {
+    if (!isExtendedCompletionItem(item)) {
         return null;
     }
 
-    const lspClient = getLspClientForModel(model);
+    const lspClient = getLspClientForModel(item.sourceModel);
     if (!lspClient) {
         return null;
     }
 
     try {
-        const result = await lspClient.resolveCompletionItem(original);
-        return convertCompletionItem(result);
+        const result = await lspClient.resolveCompletionItem(item.originalLspItem);
+        return convertCompletionItem(result, item.sourceModel);
     } catch {
         return null;
     }
@@ -345,7 +353,7 @@ async function handleResolveCompletionRequest(
 function convertCompletionItem(
     item: CompletionItem,
     model?: monaco.editor.ITextModel
-): monaco.languages.CompletionItem {
+): ExtendedCompletionItem {
     let insertText = item.label;
     let range: monaco.IRange | monaco.languages.CompletionItemRanges | undefined;
     if (item.textEdit) {
@@ -384,13 +392,21 @@ function convertCompletionItem(
         range: range!, // ! FIXME: figure out the default value
     };
 
-    // ! FIXME: Stash a few additional pieces of information.
-    (converted as any).__original = item;
-    if (model) {
-        (converted as any).model = model;
+    if (!model) {
+        throw new Error('Model is required for completion item conversion');
     }
 
-    return converted;
+    return {
+        ...converted,
+        originalLspItem: item,
+        sourceModel: model,
+    };
+}
+
+function isExtendedCompletionItem(
+    item: monaco.languages.CompletionItem
+): item is ExtendedCompletionItem {
+    return 'originalLspItem' in item && 'sourceModel' in item;
 }
 
 function convertCompletionItemKind(

@@ -5,7 +5,7 @@
  * talks to the remote language server via an LSP session.
  */
 
-import {
+import type {
     CompletionItem,
     CompletionList,
     Diagnostic,
