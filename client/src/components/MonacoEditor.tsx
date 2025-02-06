@@ -85,6 +85,7 @@ export interface MonacoEditorProps {
     code: string;
     diagnostics: Diagnostic[];
 
+    // callbacks
     onUpdateCode: (code: string) => void;
 }
 
@@ -100,6 +101,7 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
     const monacoRef = useRef<Monaco>();
 
+    // Capture the editor and monaco instance on mount
     function handleEditorDidMount(
         editor: monaco.editor.IStandaloneCodeEditor,
         monacoInstance: Monaco
@@ -110,6 +112,7 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
         editor.focus();
     }
 
+    // Expose imperative methods for editor interaction
     useImperativeHandle(ref, () => {
         return {
             focus: () => {
@@ -130,7 +133,8 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
         if (monacoRef?.current && editorRef?.current) {
             const model = editorRef.current.getModel();
             if (model) {
-                setFileMarkers(monacoRef.current, model, props.diagnostics);
+                const markers = convertDiagnostics(props.diagnostics);
+                monacoRef.current.editor.setModelMarkers(model, 'pyright', markers);
                 // Register the editor and the LSP Client so they can be accessed
                 // by the hover provider, etc.
                 registerModel(model, props.lspClient);
@@ -156,38 +160,13 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
 // instance and its associated LSP client. This is a bit of a hack,
 // but it's required to support the various providers (e.g. hover).
 function registerModel(model: monaco.editor.ITextModel, lspClient: LspClient) {
-    if (registeredModels.find((m) => m.model === model)) {
-        return;
+    if (!registeredModels.find((m) => m.model === model)) {
+        registeredModels.push({ model, lspClient });
     }
-
-    registeredModels.push({ model, lspClient });
 }
 
 function getLspClientForModel(model: monaco.editor.ITextModel): LspClient | undefined {
     return registeredModels.find((m) => m.model === model)?.lspClient;
-}
-
-function setFileMarkers(
-    monacoInstance: Monaco,
-    model: monaco.editor.ITextModel,
-    diagnostics: Diagnostic[]
-) {
-    const markers: monaco.editor.IMarkerData[] = [];
-
-    diagnostics.forEach((diag) => {
-        const markerData: monaco.editor.IMarkerData = {
-            ...convertRange(diag.range),
-            severity: convertSeverity(diag.severity ?? DiagnosticSeverity.Hint),
-            message: diag.message,
-        };
-
-        if (diag.tags) {
-            markerData.tags = diag.tags;
-        }
-        markers.push(markerData);
-    });
-
-    monacoInstance.editor.setModelMarkers(model, 'pyright', markers);
 }
 
 // #region - Monaco Request Handlers
@@ -351,10 +330,20 @@ async function handleResolveCompletionRequest(
 
 // #region - Type Conversion
 
+function convertDiagnostics(diagnostics: Diagnostic[]): monaco.editor.IMarkerData[] {
+    return diagnostics.map((diag) => {
+        return {
+            ...convertRange(diag.range),
+            severity: convertSeverity(diag.severity ?? DiagnosticSeverity.Error),
+            message: diag.message,
+            tags: diag.tags,
+        };
+    });
+}
+
 function convertSeverity(severity: DiagnosticSeverity): monaco.MarkerSeverity {
     switch (severity) {
         case DiagnosticSeverity.Error:
-        default:
             return monaco.MarkerSeverity.Error;
 
         case DiagnosticSeverity.Warning:
@@ -365,6 +354,9 @@ function convertSeverity(severity: DiagnosticSeverity): monaco.MarkerSeverity {
 
         case DiagnosticSeverity.Hint:
             return monaco.MarkerSeverity.Hint;
+
+        default:
+            return monaco.MarkerSeverity.Error;
     }
 }
 
