@@ -1,8 +1,12 @@
-# Pyright Playground
+# About this Fork
 
 > [!IMPORTANT]
 > This fork of Pyright Playground is focused on reducing the code an, making it easier to understand the key parts.
 > It removes the dynamic Pyright download, switching versions, `react-native`, etc.
+
+![image](https://github.com/user-attachments/assets/d0f3a095-421f-4967-a194-3d64ace88479)
+
+# Pyright Playground
 
 [Pyright Playground](https://pyright-play.net) provides a web experience for running Pyright.
 
