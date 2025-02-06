@@ -101,10 +101,7 @@ export class LspSession {
         });
     }
 
-    async getCompletionForPosition(
-        code: string,
-        position: Position
-    ): Promise<CompletionList | undefined> {
+    async getCompletionForPosition(code: string, position: Position): Promise<CompletionList> {
         return this._doWithSession<CompletionList>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/completion`;
             const data = await endpointRequest('POST', endpoint, { code, position });
@@ -112,7 +109,7 @@ export class LspSession {
         });
     }
 
-    async resolveCompletionItem(item: CompletionItem): Promise<CompletionItem | undefined> {
+    async resolveCompletionItem(item: CompletionItem): Promise<CompletionItem> {
         return this._doWithSession<CompletionItem>(async (sessionId) => {
             const endpoint = appServerApiAddressPrefix + `session/${sessionId}/completionresolve`;
             const data = await endpointRequest('POST', endpoint, { completionItem: item });

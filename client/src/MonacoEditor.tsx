@@ -54,7 +54,7 @@ const options: monaco.editor.IStandaloneEditorConstructionOptions = {
     // for our purposes. Swap the order so Monaco is used if available.
     fontFamily: 'Monaco, Menlo, "Courier New", monospace',
     showUnused: true,
-    wordBasedSuggestions: false,
+    wordBasedSuggestions: 'off',
     overviewRulerLanes: 0,
     renderWhitespace: 'none',
     guides: {
@@ -125,7 +125,7 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
                 registerModel(model, props.lspClient);
             }
         }
-    }, [props.diagnostics]);
+    }, [props.diagnostics, props.lspClient]);
 
     return (
         <Box sx={styles.editor}>
@@ -134,9 +134,7 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
                 language={'python'}
                 value={props.code}
                 theme="vs"
-                onChange={(value) => {
-                    value && props.onUpdateCode(value);
-                }}
+                onChange={(value) => value && props.onUpdateCode(value)}
                 onMount={handleEditorDidMount}
             />
         </Box>
@@ -144,7 +142,7 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
 });
 
 function setFileMarkers(
-    monacoInstance: any,
+    monacoInstance: Monaco,
     model: monaco.editor.ITextModel,
     diagnostics: Diagnostic[]
 ) {
@@ -215,7 +213,7 @@ async function handleHoverRequest(
             ],
             range: convertRange(hoverInfo.range),
         };
-    } catch (err) {
+    } catch {
         return null;
     }
 }
@@ -260,7 +258,7 @@ async function handleRenameRequest(
         }
 
         return { edits };
-    } catch (err) {
+    } catch {
         return null;
     }
 }
@@ -290,7 +288,7 @@ async function handleSignatureHelpRequest(
             },
             dispose: () => {},
         };
-    } catch (err) {
+    } catch {
         return null;
     }
 }
@@ -298,7 +296,7 @@ async function handleSignatureHelpRequest(
 async function handleProvideCompletionRequest(
     model: monaco.editor.ITextModel,
     position: monaco.Position
-): Promise<monaco.languages.CompletionList> {
+): Promise<monaco.languages.CompletionList | null> {
     const lspClient = getLspClientForModel(model);
     if (!lspClient) {
         return null;
@@ -317,14 +315,14 @@ async function handleProvideCompletionRequest(
             incomplete: completionInfo.isIncomplete,
             dispose: () => {},
         };
-    } catch (err) {
+    } catch {
         return null;
     }
 }
 
 async function handleResolveCompletionRequest(
     item: monaco.languages.CompletionItem
-): Promise<monaco.languages.CompletionItem> {
+): Promise<monaco.languages.CompletionItem | null> {
     const model = (item as any).model as monaco.editor.ITextModel | undefined;
     const original = (item as any).__original as CompletionItem | undefined;
     if (!model || !original) {
@@ -339,7 +337,7 @@ async function handleResolveCompletionRequest(
     try {
         const result = await lspClient.resolveCompletionItem(original);
         return convertCompletionItem(result);
-    } catch (err) {
+    } catch {
         return null;
     }
 }
@@ -348,6 +346,30 @@ function convertCompletionItem(
     item: CompletionItem,
     model?: monaco.editor.ITextModel
 ): monaco.languages.CompletionItem {
+    let insertText = item.label;
+    let range: monaco.IRange | monaco.languages.CompletionItemRanges | undefined;
+    if (item.textEdit) {
+        insertText = item.textEdit.newText;
+        if (InsertReplaceEdit.is(item.textEdit)) {
+            range = {
+                insert: convertRange(item.textEdit.insert),
+                replace: convertRange(item.textEdit.replace),
+            };
+        } else {
+            range = convertRange(item.textEdit.range);
+        }
+    }
+
+    let additionalTextEdits: { range: monaco.IRange; text: string }[] | undefined;
+    if (item.additionalTextEdits) {
+        additionalTextEdits = item.additionalTextEdits.map((edit) => {
+            return {
+                range: convertRange(edit.range),
+                text: edit.newText,
+            };
+        });
+    }
+
     const converted: monaco.languages.CompletionItem = {
         label: item.label,
         kind: convertCompletionItemKind(item.kind),
@@ -357,32 +379,12 @@ function convertCompletionItem(
         sortText: item.sortText,
         filterText: item.filterText,
         preselect: item.preselect,
-        insertText: item.label,
-        range: undefined,
+        insertText,
+        additionalTextEdits,
+        range: range!, // ! FIXME: figure out the default value
     };
 
-    if (item.textEdit) {
-        converted.insertText = item.textEdit.newText;
-        if (InsertReplaceEdit.is(item.textEdit)) {
-            converted.range = {
-                insert: convertRange(item.textEdit.insert),
-                replace: convertRange(item.textEdit.replace),
-            };
-        } else {
-            converted.range = convertRange(item.textEdit.range);
-        }
-    }
-
-    if (item.additionalTextEdits) {
-        converted.additionalTextEdits = item.additionalTextEdits.map((edit) => {
-            return {
-                range: convertRange(edit.range),
-                text: edit.newText,
-            };
-        });
-    }
-
-    // Stash a few additional pieces of information.
+    // ! FIXME: Stash a few additional pieces of information.
     (converted as any).__original = item;
     if (model) {
         (converted as any).model = model;
@@ -392,7 +394,7 @@ function convertCompletionItem(
 }
 
 function convertCompletionItemKind(
-    itemKind: CompletionItemKind
+    itemKind: CompletionItemKind | undefined
 ): monaco.languages.CompletionItemKind {
     switch (itemKind) {
         case CompletionItemKind.Constant:

@@ -68,16 +68,11 @@ export class LspClient {
         return this._lspSession.getSignatureHelpForPosition(code, position);
     }
 
-    async getCompletionForPosition(
-        code: string,
-        position: Position
-    ): Promise<CompletionList | undefined> {
+    async getCompletionForPosition(code: string, position: Position): Promise<CompletionList> {
         return this._lspSession.getCompletionForPosition(code, position);
     }
 
-    async resolveCompletionItem(
-        completionItem: CompletionItem
-    ): Promise<CompletionItem | undefined> {
+    async resolveCompletionItem(completionItem: CompletionItem): Promise<CompletionItem> {
         return this._lspSession.resolveCompletionItem(completionItem);
     }
 
