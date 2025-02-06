@@ -24,6 +24,12 @@ interface ExtendedCompletionItem extends monaco.languages.CompletionItem {
     sourceModel: monaco.editor.ITextModel;
 }
 
+function isExtendedCompletionItem(
+    item: monaco.languages.CompletionItem
+): item is ExtendedCompletionItem {
+    return 'originalLspItem' in item && 'sourceModel' in item;
+}
+
 loader
     .init()
     .then((monaco) => {
@@ -133,7 +139,7 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
     }, [props.diagnostics, props.lspClient]);
 
     return (
-        <Box sx={styles.editor}>
+        <Box sx={{ flex: 1, py: 0.5 }}>
             <Editor
                 options={options}
                 language={'python'}
@@ -145,6 +151,21 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
         </Box>
     );
 });
+
+// Register an instantiated text model (which backs a monaco editor
+// instance and its associated LSP client. This is a bit of a hack,
+// but it's required to support the various providers (e.g. hover).
+function registerModel(model: monaco.editor.ITextModel, lspClient: LspClient) {
+    if (registeredModels.find((m) => m.model === model)) {
+        return;
+    }
+
+    registeredModels.push({ model, lspClient });
+}
+
+function getLspClientForModel(model: monaco.editor.ITextModel): LspClient | undefined {
+    return registeredModels.find((m) => m.model === model)?.lspClient;
+}
 
 function setFileMarkers(
     monacoInstance: Monaco,
@@ -169,31 +190,7 @@ function setFileMarkers(
     monacoInstance.editor.setModelMarkers(model, 'pyright', markers);
 }
 
-function convertSeverity(severity: DiagnosticSeverity): monaco.MarkerSeverity {
-    switch (severity) {
-        case DiagnosticSeverity.Error:
-        default:
-            return monaco.MarkerSeverity.Error;
-
-        case DiagnosticSeverity.Warning:
-            return monaco.MarkerSeverity.Warning;
-
-        case DiagnosticSeverity.Information:
-            return monaco.MarkerSeverity.Info;
-
-        case DiagnosticSeverity.Hint:
-            return monaco.MarkerSeverity.Hint;
-    }
-}
-
-function convertRange(range: Range): monaco.IRange {
-    return {
-        startLineNumber: range.start.line + 1,
-        startColumn: range.start.character + 1,
-        endLineNumber: range.end.line + 1,
-        endColumn: range.end.character + 1,
-    };
-}
+// #region - Monaco Request Handlers
 
 async function handleHoverRequest(
     model: monaco.editor.ITextModel,
@@ -350,9 +347,39 @@ async function handleResolveCompletionRequest(
     }
 }
 
+// #endregion
+
+// #region - Type Conversion
+
+function convertSeverity(severity: DiagnosticSeverity): monaco.MarkerSeverity {
+    switch (severity) {
+        case DiagnosticSeverity.Error:
+        default:
+            return monaco.MarkerSeverity.Error;
+
+        case DiagnosticSeverity.Warning:
+            return monaco.MarkerSeverity.Warning;
+
+        case DiagnosticSeverity.Information:
+            return monaco.MarkerSeverity.Info;
+
+        case DiagnosticSeverity.Hint:
+            return monaco.MarkerSeverity.Hint;
+    }
+}
+
+function convertRange(range: Range): monaco.IRange {
+    return {
+        startLineNumber: range.start.line + 1,
+        startColumn: range.start.character + 1,
+        endLineNumber: range.end.line + 1,
+        endColumn: range.end.character + 1,
+    };
+}
+
 function convertCompletionItem(
     item: CompletionItem,
-    model?: monaco.editor.ITextModel
+    model: monaco.editor.ITextModel
 ): ExtendedCompletionItem {
     let insertText = item.label;
     let range: monaco.IRange | monaco.languages.CompletionItemRanges | undefined;
@@ -392,21 +419,11 @@ function convertCompletionItem(
         range: range!, // ! FIXME: figure out the default value
     };
 
-    if (!model) {
-        throw new Error('Model is required for completion item conversion');
-    }
-
     return {
         ...converted,
         originalLspItem: item,
         sourceModel: model,
     };
-}
-
-function isExtendedCompletionItem(
-    item: monaco.languages.CompletionItem
-): item is ExtendedCompletionItem {
-    return 'originalLspItem' in item && 'sourceModel' in item;
 }
 
 function convertCompletionItemKind(
@@ -433,24 +450,4 @@ function convertCompletionItemKind(
     }
 }
 
-// Register an instantiated text model (which backs a monaco editor
-// instance and its associated LSP client. This is a bit of a hack,
-// but it's required to support the various providers (e.g. hover).
-function registerModel(model: monaco.editor.ITextModel, lspClient: LspClient) {
-    if (registeredModels.find((m) => m.model === model)) {
-        return;
-    }
-
-    registeredModels.push({ model, lspClient });
-}
-
-function getLspClientForModel(model: monaco.editor.ITextModel): LspClient | undefined {
-    return registeredModels.find((m) => m.model === model)?.lspClient;
-}
-
-const styles = {
-    editor: {
-        flex: 1,
-        py: 0.5,
-    },
-};
+// #endregion
