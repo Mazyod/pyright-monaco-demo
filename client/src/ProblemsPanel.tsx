@@ -3,13 +3,11 @@
  * Panel that displays a list of diagnostics.
  */
 
-import * as icons from '@ant-design/icons-svg';
-import { IconDefinition } from '@ant-design/icons-svg/lib/types';
 import { Box, ButtonBase, CircularProgress, Typography } from '@mui/material';
 import { useRef } from 'react';
 import { Diagnostic, DiagnosticSeverity, Range } from 'vscode-languageserver-types';
 import { useHover } from './HoverHook';
-import { SvgIcon } from './SvgIcon';
+import { IconName, MuiIcon } from './MuiIcon';
 
 export interface ProblemsPanelProps {
     diagnostics: Diagnostic[];
@@ -111,22 +109,22 @@ function NoProblemsItem() {
 }
 
 function ProblemIcon(props: { severity: DiagnosticSeverity | undefined }) {
-    let iconDefinition: IconDefinition;
+    let iconName: IconName;
     let iconColor: string;
 
     if (props.severity === undefined || props.severity === DiagnosticSeverity.Error) {
-        iconDefinition = icons.CloseCircleOutlined;
+        iconName = 'close-circle';
         iconColor = '#e51400';
     } else if (props.severity === DiagnosticSeverity.Warning) {
-        iconDefinition = icons.WarningOutlined;
+        iconName = 'warning';
         iconColor = '#b89500';
     } else {
         // Information
-        iconDefinition = icons.InfoCircleOutlined;
+        iconName = 'info-circle';
         iconColor = 'blue';
     }
 
-    return <SvgIcon iconDefinition={iconDefinition} iconSize={14} color={iconColor} />;
+    return <MuiIcon name={iconName} size={14} color={iconColor} />;
 }
 
 const styles = {

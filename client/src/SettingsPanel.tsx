@@ -3,7 +3,6 @@
  * A panel that displays settings for the app.
  */
 
-import * as icons from '@ant-design/icons-svg';
 import { Box, Typography } from '@mui/material';
 import { useRef } from 'react';
 import { CheckmarkMenu, CheckmarkMenuItem } from './CheckmarkMenu';
@@ -114,7 +113,7 @@ export function SettingsPanel(props: SettingsPanelProps) {
 function MenuButton(props: { onPress: () => void }) {
     return (
         <IconButton
-            iconDefinition={icons.DownCircleOutlined}
+            icon="down-circle"
             iconSize={18}
             color="#669"
             hoverColor="#336"
@@ -152,7 +151,7 @@ function ConfigOverride(props: ConfigOverrideProps) {
             </Typography>
             <Box sx={{ mt: -0.5 }}>
                 <IconButton
-                    iconDefinition={icons.CloseOutlined}
+                    icon="close"
                     iconSize={12}
                     color="#666"
                     hoverColor="#333"

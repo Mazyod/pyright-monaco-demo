@@ -3,14 +3,13 @@
  * A button that displays an icon and handles press and hover events.
  */
 
-import { IconDefinition } from '@ant-design/icons-svg/lib/types';
 import { Box, IconButton as MuiIconButton } from '@mui/material';
 import { MouseEvent } from 'react';
 import { useHover } from './HoverHook';
-import { SvgIcon } from './SvgIcon';
+import { IconName, MuiIcon } from './MuiIcon';
 
 interface IconButtonProps {
-    iconDefinition: IconDefinition;
+    icon: IconName;
     iconSize: number;
     disabled?: boolean;
     title?: string;
@@ -50,9 +49,9 @@ export default function IconButton(props: IconButtonProps) {
                     },
                 }}
             >
-                <SvgIcon
-                    iconDefinition={props.iconDefinition}
-                    iconSize={props.iconSize}
+                <MuiIcon
+                    name={props.icon}
+                    size={props.iconSize}
                     color={effectiveColor}
                 />
             </MuiIconButton>

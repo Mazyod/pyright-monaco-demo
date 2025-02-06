@@ -3,7 +3,7 @@
  * Utility functions for working with local storage.
  */
 
-import { PlaygroundState } from './PlaygroundSettings';
+import type { PlaygroundState } from './PlaygroundSettings';
 
 const localStorageKeyName = 'playgroundState';
 

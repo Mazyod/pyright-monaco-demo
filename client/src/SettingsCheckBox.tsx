@@ -3,10 +3,9 @@
  * A simple check box (toggle) control used in the settings panel.
  */
 
-import * as icons from '@ant-design/icons-svg';
 import { Box, ButtonBase, Typography } from '@mui/material';
 import { useHover } from './HoverHook';
-import { SvgIcon } from './SvgIcon';
+import { MuiIcon } from './MuiIcon';
 
 export interface SettingsCheckboxProps {
     label: string;
@@ -43,9 +42,9 @@ export function SettingsCheckbox(props: SettingsCheckboxProps) {
                 className="settings-checkbox-box"
             >
                 {props.value && (
-                    <SvgIcon
-                        iconDefinition={icons.CheckOutlined}
-                        iconSize={12}
+                    <MuiIcon
+                        name="check"
+                        size={12}
                         color={props.disabled ? '#aaa' : '#669'}
                     />
                 )}

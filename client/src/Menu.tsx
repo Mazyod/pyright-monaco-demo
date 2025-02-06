@@ -3,11 +3,10 @@
  * Provides rendering of (and interaction with) a menu of options.
  */
 
-import { IconDefinition } from '@ant-design/icons-svg/lib/types';
 import { Box, Menu as MuiMenu, MenuItem as MuiMenuItem, Typography } from '@mui/material';
 import React, { ForwardedRef, forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { useHover } from './HoverHook';
-import { SvgIcon } from './SvgIcon';
+import { IconName, MuiIcon } from './MuiIcon';
 
 export const menuIconColor = '#669';
 export const panelTextColor = '#222';
@@ -69,7 +68,7 @@ export interface MenuItemProps {
     label: string;
     labelFilterText?: string;
     title?: string;
-    iconDefinition?: IconDefinition;
+    icon?: IconName;
     disabled?: boolean;
     focused?: boolean;
     onSelect?: () => void;
@@ -123,10 +122,10 @@ export function MenuItem(props: MenuItemProps) {
             }}
         >
             <Box sx={styles.iconContainer}>
-                {props.iconDefinition && (
-                    <SvgIcon
-                        iconDefinition={props.iconDefinition}
-                        iconSize={14}
+                {props.icon && (
+                    <MuiIcon
+                        name={props.icon}
+                        size={14}
                         color={menuIconColor}
                     />
                 )}
