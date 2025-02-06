@@ -14,7 +14,7 @@ import {
     WorkspaceEdit,
 } from 'vscode-languageserver-types';
 import { endpointRequest } from './EndpointUtils';
-import { PlaygroundSettings } from '../components/PlaygroundSettings';
+import { PlaygroundSettings } from '@/components/PlaygroundSettings';
 
 export interface HoverInfo {
     contents: {

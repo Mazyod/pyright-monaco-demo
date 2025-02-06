@@ -4,7 +4,7 @@
  * handles language server interactions, the display of errors, etc.
  */
 
-import Editor, { loader, Monaco } from '@monaco-editor/react';
+import Editor, { useMonaco } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { ForwardedRef, forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { Box } from '@mui/material';
@@ -30,27 +30,6 @@ function isExtendedCompletionItem(
     return 'originalLspItem' in item && 'sourceModel' in item;
 }
 
-loader
-    .init()
-    .then((monaco) => {
-        monaco.languages.registerHoverProvider('python', {
-            provideHover: handleHoverRequest,
-        });
-        monaco.languages.registerSignatureHelpProvider('python', {
-            provideSignatureHelp: handleSignatureHelpRequest,
-            signatureHelpTriggerCharacters: ['(', ','],
-        });
-        monaco.languages.registerCompletionItemProvider('python', {
-            provideCompletionItems: handleProvideCompletionRequest,
-            resolveCompletionItem: handleResolveCompletionRequest,
-            triggerCharacters: ['.', '[', '"', "'"],
-        });
-        monaco.languages.registerRenameProvider('python', {
-            provideRenameEdits: handleRenameRequest,
-        });
-    })
-    .catch((error) => console.error('An error occurred during initialization of Monaco: ', error));
-
 const options: monaco.editor.IStandaloneEditorConstructionOptions = {
     selectOnLineNumbers: true,
     minimap: { enabled: false },
@@ -59,7 +38,6 @@ const options: monaco.editor.IStandaloneEditorConstructionOptions = {
     hover: { enabled: true },
     scrollBeyondLastLine: false,
     autoClosingOvertype: 'always',
-    autoSurround: 'quotes',
     autoIndent: 'full',
     // The default settings prefer "Menlo", but "Monaco" looks better
     // for our purposes. Swap the order so Monaco is used if available.
@@ -78,7 +56,6 @@ interface RegisteredModel {
     model: monaco.editor.ITextModel;
     lspClient: LspClient;
 }
-const registeredModels: RegisteredModel[] = [];
 
 export interface MonacoEditorProps {
     lspClient: LspClient;
@@ -98,16 +75,12 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
     props: MonacoEditorProps,
     ref: ForwardedRef<MonacoEditorRef>
 ) {
+    const monaco = useMonaco();
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
-    const monacoRef = useRef<Monaco>();
 
     // Capture the editor and monaco instance on mount
-    function handleEditorDidMount(
-        editor: monaco.editor.IStandaloneCodeEditor,
-        monacoInstance: Monaco
-    ) {
+    function handleEditorDidMount(editor: monaco.editor.IStandaloneCodeEditor) {
         editorRef.current = editor;
-        monacoRef.current = monacoInstance;
 
         editor.focus();
     }
@@ -129,18 +102,46 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
         };
     });
 
+    // Configure Monaco
     useEffect(() => {
-        if (monacoRef?.current && editorRef?.current) {
+        if (!monaco) {
+            return;
+        }
+
+        const disposables: monaco.IDisposable[] = [];
+        disposables.push(
+            monaco.languages.registerHoverProvider('python', {
+                provideHover: handleHoverRequest,
+            }),
+            monaco.languages.registerSignatureHelpProvider('python', {
+                provideSignatureHelp: handleSignatureHelpRequest,
+                signatureHelpTriggerCharacters: ['(', ','],
+            }),
+            monaco.languages.registerCompletionItemProvider('python', {
+                provideCompletionItems: handleProvideCompletionRequest,
+                resolveCompletionItem: handleResolveCompletionRequest,
+                triggerCharacters: ['.', '[', '"', "'"],
+            }),
+            monaco.languages.registerRenameProvider('python', {
+                provideRenameEdits: handleRenameRequest,
+            })
+        );
+
+        return () => disposables.forEach((d) => d.dispose());
+    }, [monaco]);
+
+    useEffect(() => {
+        if (monaco && editorRef?.current) {
             const model = editorRef.current.getModel();
             if (model) {
                 const markers = convertDiagnostics(props.diagnostics);
-                monacoRef.current.editor.setModelMarkers(model, 'pyright', markers);
+                monaco.editor.setModelMarkers(model, 'pyright', markers);
                 // Register the editor and the LSP Client so they can be accessed
                 // by the hover provider, etc.
                 registerModel(model, props.lspClient);
             }
         }
-    }, [props.diagnostics, props.lspClient]);
+    }, [monaco, props.diagnostics, props.lspClient]);
 
     return (
         <Box sx={{ flex: 1, py: 0.5 }}>
@@ -159,6 +160,8 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
 // Register an instantiated text model (which backs a monaco editor
 // instance and its associated LSP client. This is a bit of a hack,
 // but it's required to support the various providers (e.g. hover).
+const registeredModels: RegisteredModel[] = [];
+
 function registerModel(model: monaco.editor.ITextModel, lspClient: LspClient) {
     if (!registeredModels.find((m) => m.model === model)) {
         registeredModels.push({ model, lspClient });
