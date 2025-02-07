@@ -208,14 +208,6 @@ function validateSessionOptions(req: Request, res: Response): SessionOptions | u
         return undefined;
     }
 
-    const pyrightVersion = req.body.pyrightVersion;
-    if (pyrightVersion !== undefined) {
-        if (typeof pyrightVersion !== 'string' || !pyrightVersion.match(/1.[0-9]+.[0-9]+/)) {
-            res.status(400).json({ message: 'Invalid pyrightVersion' });
-            return undefined;
-        }
-    }
-
     const pythonVersion = req.body.pythonVersion;
     if (pythonVersion !== undefined) {
         if (typeof pythonVersion !== 'string' || !pythonVersion.match(/3.[0-9]+/)) {
@@ -275,7 +267,6 @@ function validateSessionOptions(req: Request, res: Response): SessionOptions | u
     }
 
     return {
-        pyrightVersion,
         pythonVersion,
         pythonPlatform,
         typeCheckingMode,

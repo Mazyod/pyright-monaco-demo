@@ -5,7 +5,7 @@
  */
 
 import * as fs from 'fs';
-import { exec, fork } from 'node:child_process';
+import { fork } from 'node:child_process';
 import * as os from 'os';
 import * as path from 'path';
 import { v4 as uuid } from 'uuid';
@@ -22,9 +22,6 @@ const inactiveSessions: Session[] = [];
 // Maximum time a session can be idle before it is closed.
 const maxSessionLifetime = 1 * 60 * 1000; // 1 minute
 
-// Maximum number of pyright versions to return to the caller.
-const maxPyrightVersionCount = 50;
-
 // If the caller doesn't specify the pythonVersion or pythonPlatform,
 // default to these. Otherwise the language server will pick these
 // based on whatever version of Python happens to be installed in
@@ -34,11 +31,6 @@ const defaultPythonPlatform = 'All';
 
 // Active lifetime timer for harvesting old sessions.
 let lifetimeTimer: NodeJS.Timeout | undefined;
-
-// Cached "latest" version of pyright.
-const timeBetweenVersionRequestsInMs = 60 * 60 * 1000; // 1 hour
-let lastVersionRequestTime = 0;
-let lastVersion = '';
 
 const maxInactiveSessionCount = 64;
 
@@ -64,7 +56,7 @@ export async function createSession(
         return restartSession(inactiveSession, sessionOptions);
     }
 
-    return startSession("", sessionOptions);
+    return startSession('', sessionOptions);
 }
 
 // Places an existing session into an inactive pool that can be used
@@ -268,7 +260,6 @@ function getCompatibleInactiveSession(sessionOptions?: SessionOptions): Session 
         if (
             sessionOptions?.pythonVersion !== session.options?.pythonVersion ||
             sessionOptions?.pythonPlatform !== session.options?.pythonPlatform ||
-            sessionOptions?.pyrightVersion !== session.options?.pyrightVersion ||
             sessionOptions?.locale !== session.options?.locale ||
             sessionOptions?.typeCheckingMode !== session.options?.typeCheckingMode
         ) {

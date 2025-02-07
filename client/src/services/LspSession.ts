@@ -4,7 +4,7 @@
  * Handles the state associated with a remote language server session.
  */
 
-import {
+import type {
     CompletionItem,
     CompletionList,
     Diagnostic,
@@ -159,10 +159,6 @@ export class LspSession {
 
         const sessionOptions: any = {};
         if (this._settings) {
-            if (this._settings.pyrightVersion) {
-                sessionOptions.pyrightVersion = this._settings.pyrightVersion;
-            }
-
             if (this._settings.pythonVersion) {
                 sessionOptions.pythonVersion = this._settings.pythonVersion;
             }

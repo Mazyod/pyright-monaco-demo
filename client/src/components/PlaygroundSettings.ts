@@ -6,7 +6,6 @@
 export interface PlaygroundSettings {
     strictMode?: boolean;
     configOverrides: { [name: string]: boolean };
-    pyrightVersion?: string;
     pythonVersion?: string;
     pythonPlatform?: string;
     locale?: string;

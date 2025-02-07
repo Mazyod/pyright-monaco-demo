@@ -13,7 +13,6 @@ export type SessionId = string;
 export interface SessionOptions {
     pythonVersion?: string;
     pythonPlatform?: string;
-    pyrightVersion?: string;
     typeCheckingMode?: string;
     configOverrides?: { [name: string]: boolean };
     locale?: string;
