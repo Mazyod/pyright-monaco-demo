@@ -10,7 +10,8 @@
         "vscode-jsonrpc": "^8.2.0",
         "vscode-languageclient": "^9.0.1",
         "vscode-languageserver": "^9.0.1",
-        "winston": "^3.11.0"
+        "winston": "^3.11.0",
+        "zod": "^3.24.1"
     },
     "devDependencies": {
         "@babel/core": "^7.20.0",

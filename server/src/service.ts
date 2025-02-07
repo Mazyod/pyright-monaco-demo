@@ -6,14 +6,43 @@
 import { Request, Response } from 'express';
 import * as SessionManager from './sessionManager';
 import { Session, SessionOptions } from './session';
-import { Position } from 'vscode-languageserver';
+import { CompletionItem } from 'vscode-languageserver';
 import { logger } from './logging';
+import { z } from 'zod';
 
-interface CodeWithOptions {
-    code: string;
-    position?: Position;
-    newName?: string;
-}
+// Zod schemas for validation
+const positionSchema = z.object({
+    line: z.number(),
+    character: z.number(),
+});
+
+const codeWithOptionsSchema = z.object({
+    code: z.string(),
+    position: positionSchema.optional(),
+    newName: z.string().optional(),
+});
+
+const sessionOptionsSchema = z.object({
+    pythonVersion: z
+        .string()
+        .regex(/3.[0-9]+/)
+        .optional(),
+    pythonPlatform: z.string().optional(),
+    typeCheckingMode: z.literal('strict').optional(),
+    configOverrides: z.record(z.boolean()).optional(),
+    locale: z.string().optional(),
+    code: z.string().optional(),
+});
+
+const completionItemSchema = z.object({
+    completionItem: z
+        .object({
+            label: z.string(),
+        })
+        .passthrough(),
+});
+
+type CodeWithOptions = z.infer<typeof codeWithOptionsSchema>;
 
 // Retrieves the current status of the service including the
 // versions of pyright that it supports.
@@ -180,17 +209,13 @@ export function resolveCompletion(req: Request, res: Response) {
         return;
     }
 
-    if (!req.body || typeof req.body !== 'object') {
-        res.status(400).json({ message: 'Invalid request body' });
+    const result = completionItemSchema.safeParse(req.body);
+    if (!result.success) {
+        res.status(400).json({ message: result.error.message });
         return;
     }
 
-    const completionItem = req.body.completionItem;
-    if (typeof completionItem !== 'object') {
-        res.status(400).json({ message: 'Invalid completionItem' });
-        return;
-    }
-
+    const completionItem: CompletionItem = result.data.completionItem;
     langClient
         .resolveCompletion(completionItem)
         .then((completionItem) => {
@@ -208,122 +233,41 @@ function validateSessionOptions(req: Request, res: Response): SessionOptions | u
         return undefined;
     }
 
-    const pythonVersion = req.body.pythonVersion;
-    if (pythonVersion !== undefined) {
-        if (typeof pythonVersion !== 'string' || !pythonVersion.match(/3.[0-9]+/)) {
-            res.status(400).json({ message: 'Invalid pythonVersion' });
-            return undefined;
-        }
+    const result = sessionOptionsSchema.safeParse(req.body);
+    if (!result.success) {
+        res.status(400).json({ message: result.error.message });
+        return undefined;
     }
 
-    const pythonPlatform = req.body.pythonPlatform;
-    if (pythonPlatform !== undefined) {
-        if (typeof pythonPlatform !== 'string') {
-            res.status(400).json({ message: 'Invalid pythonPlatform' });
-            return undefined;
-        }
-    }
-
-    const locale = req.body.locale;
-    if (locale !== undefined) {
-        if (typeof locale !== 'string') {
-            res.status(400).json({ message: 'Invalid locale' });
-            return undefined;
-        }
-    }
-
-    const typeCheckingMode = req.body.typeCheckingMode;
-    if (typeCheckingMode !== undefined) {
-        if (typeCheckingMode !== 'strict') {
-            res.status(400).json({ message: 'Invalid typeCheckingMode' });
-            return undefined;
-        }
-    }
-
-    const code = req.body.code;
-    if (code !== undefined) {
-        if (typeof code !== 'string') {
-            res.status(400).json({ message: 'Invalid code' });
-            return undefined;
-        }
-    }
-
-    const configOverrides: { [name: string]: boolean } = {};
-    if (req.body.configOverrides !== undefined) {
-        if (typeof req.body.configOverrides !== 'object') {
-            res.status(400).json({ message: 'Invalid configOverrides' });
-            return undefined;
-        }
-
-        for (const key of Object.keys(req.body.configOverrides)) {
-            const value = req.body.configOverrides[key];
-            if (typeof value !== 'boolean') {
-                res.status(400).json({ message: `Invalid value for configOverrides key ${key}` });
-                return undefined;
-            }
-
-            configOverrides[key] = value;
-        }
-    }
-
-    return {
-        pythonVersion,
-        pythonPlatform,
-        typeCheckingMode,
-        configOverrides,
-        locale,
-        code,
-    };
+    return result.data;
 }
 
 function validateCodeWithOptions(
     req: Request,
     res: Response,
-    options?: string[]
+    requiredOptions: ('position' | 'newName')[] = []
 ): CodeWithOptions | undefined {
-    let reportedError = false;
-
-    if (!req.body || typeof req.body !== 'object') {
-        res.status(400).json({ message: 'Invalid request body' });
+    const result = codeWithOptionsSchema.safeParse(req.body);
+    if (!result.success) {
+        res.status(400).json({ message: result.error.message });
         return undefined;
     }
 
-    const code = req.body.code;
-    if (typeof code !== 'string') {
-        res.status(400).json({ message: 'Invalid code' });
-        return undefined;
-    }
-
-    const response: CodeWithOptions = { code };
-
-    options?.forEach((option) => {
-        if (option === 'position') {
-            const position = req.body.position;
-            if (
-                typeof position !== 'object' ||
-                typeof position.line !== 'number' ||
-                typeof position.character !== 'number'
-            ) {
-                res.status(400).json({ message: 'Invalid position' });
-                reportedError = true;
-            } else {
-                response.position = {
-                    line: position.line,
-                    character: position.character,
-                };
-            }
-        } else if (option === 'newName') {
-            const newName = req.body.newName;
-            if (typeof newName !== 'string') {
-                res.status(400).json({ message: 'Invalid newName' });
-                reportedError = true;
-            } else {
-                response.newName = newName;
-            }
-        }
+    // Check required options after parsing
+    const missingFields = requiredOptions.filter((option) => {
+        if (option === 'position') return !result.data.position;
+        if (option === 'newName') return !result.data.newName;
+        return false;
     });
 
-    return reportedError ? undefined : response;
+    if (missingFields.length > 0) {
+        res.status(400).json({
+            message: `Missing required fields: ${missingFields.join(', ')}`,
+        });
+        return undefined;
+    }
+
+    return result.data;
 }
 
 function validateSession(req: Request, res: Response): Session | undefined {
