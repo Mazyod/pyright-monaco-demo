@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /*
  * Copyright (c) Eric Traut
  * Handles the state associated with a remote language server session.
@@ -16,6 +15,12 @@ import type {
 import { endpointRequest } from './EndpointUtils';
 import { PlaygroundSettings } from '@/components/PlaygroundSettings';
 
+export interface DiagnosticEvents {
+    onWaitingForDiagnostics: (isWaiting: boolean) => void;
+    onDiagnostics: (diag: Diagnostic[]) => void;
+    onError: (message: string) => void;
+}
+
 export interface HoverInfo {
     contents: {
         kind: string;
@@ -31,22 +36,60 @@ const maxErrorCount = 4;
 const appServerApiAddressPrefix = 'http://localhost:8080/lsp/';
 
 export class LspSession {
+    private readonly _settings: PlaygroundSettings | undefined;
+    private readonly _eventHandlers?: DiagnosticEvents;
+
     private _sessionId: string | undefined;
-    private _settings: PlaygroundSettings | undefined;
-    private _initialCode = '';
+    private _code;
+    private _version: number;
 
-    updateSettings(settings: PlaygroundSettings) {
-        this._settings = settings;
-
-        // Force the current session to close so we can
-        // create a new one with the updated settings.
-        this._closeSession();
-    }
-
-    updateInitialCode(text: string) {
+    constructor(
+        initialCode: string,
+        settings: PlaygroundSettings,
+        eventHandlers?: DiagnosticEvents
+    ) {
         // When creating a new session, we can send the initial
         // code to the server to speed up initialization.
-        this._initialCode = text;
+        this._code = initialCode;
+        this._version = 0;
+        this._settings = settings;
+        this._eventHandlers = eventHandlers;
+    }
+
+    async shutdown() {
+        const sessionId = this._sessionId;
+        if (!sessionId) {
+            return;
+        }
+
+        // Immediately discard the old session ID.
+        this._sessionId = undefined;
+
+        const endpoint = appServerApiAddressPrefix + `session/${sessionId}`;
+        await endpointRequest('DELETE', endpoint);
+    }
+
+    async updateCode(code: string) {
+        this._code = code;
+        const version = this._version;
+
+        this._eventHandlers?.onWaitingForDiagnostics(true);
+
+        this.getDiagnostics(code)
+            .then((diagnostics) => {
+                // Ensure that the diagnostics are associated with the current version of the code.
+                if (this._version === version) {
+                    this._eventHandlers?.onDiagnostics(diagnostics);
+                }
+            })
+            .catch((error) => {
+                this._eventHandlers?.onError(error.message);
+            })
+            .finally(() => {
+                if (this._version === version) {
+                    this._eventHandlers?.onWaitingForDiagnostics(false);
+                }
+            });
     }
 
     async getDiagnostics(code: string): Promise<Diagnostic[]> {
@@ -141,41 +184,41 @@ export class LspSession {
             return Promise.resolve(this._sessionId);
         }
 
-        const sessionOptions: any = {};
+        let pythonVersion: string | undefined;
+        let pythonPlatform: string | undefined;
+        let typeCheckingMode: 'strict' | undefined;
+        let code: string | undefined;
+        let configOverrides: { [name: string]: boolean } | undefined;
+        let locale: string | undefined;
+
         if (this._settings) {
             if (this._settings.pythonVersion) {
-                sessionOptions.pythonVersion = this._settings.pythonVersion;
+                pythonVersion = this._settings.pythonVersion;
             }
 
             if (this._settings.pythonPlatform) {
-                sessionOptions.pythonPlatform = this._settings.pythonPlatform;
+                pythonPlatform = this._settings.pythonPlatform;
             }
 
             if (this._settings.strictMode) {
-                sessionOptions.typeCheckingMode = 'strict';
+                typeCheckingMode = 'strict';
             }
 
-            sessionOptions.code = this._initialCode;
-            sessionOptions.configOverrides = { ...this._settings.configOverrides };
-            sessionOptions.locale = this._settings.locale ?? navigator.language;
+            code = this._code;
+            configOverrides = { ...this._settings.configOverrides };
+            locale = this._settings.locale ?? navigator.language;
         }
 
         const endpoint = appServerApiAddressPrefix + `session`;
-        const data = await endpointRequest('POST', endpoint, sessionOptions);
+        const data = await endpointRequest('POST', endpoint, {
+            pythonVersion,
+            pythonPlatform,
+            typeCheckingMode,
+            code,
+            configOverrides,
+            locale,
+        });
         this._sessionId = data.sessionId;
         return data.sessionId;
-    }
-
-    private async _closeSession(): Promise<void> {
-        const sessionId = this._sessionId;
-        if (!sessionId) {
-            return;
-        }
-
-        // Immediately discard the old session ID.
-        this._sessionId = undefined;
-
-        const endpoint = appServerApiAddressPrefix + `session/${sessionId}`;
-        await endpointRequest('DELETE', endpoint);
     }
 }

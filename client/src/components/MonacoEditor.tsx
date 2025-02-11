@@ -6,7 +6,7 @@
 
 import Editor, { useMonaco } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import { ForwardedRef, forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { ForwardedRef, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import {
     CompletionItem,
@@ -17,7 +17,8 @@ import {
     Range,
     TextDocumentEdit,
 } from 'vscode-languageserver-types';
-import { LspClient } from '@/services/LspClient';
+import { LspSession } from '@/services/LspSession';
+import { PlaygroundSettings } from './PlaygroundSettings';
 
 interface ExtendedCompletionItem extends monaco.languages.CompletionItem {
     originalLspItem: CompletionItem;
@@ -54,16 +55,18 @@ const options: monaco.editor.IStandaloneEditorConstructionOptions = {
 
 interface RegisteredModel {
     model: monaco.editor.ITextModel;
-    lspClient: LspClient;
+    lspSession: LspSession;
 }
 
 export interface MonacoEditorProps {
-    lspClient: LspClient;
-    code: string;
-    diagnostics: Diagnostic[];
+    initialCode: string;
+    settings: PlaygroundSettings;
 
     // callbacks
     onUpdateCode: (code: string) => void;
+    onWaitingForDiagnostics: (isWaiting: boolean) => void;
+    onDiagnostics: (diagnostics: Diagnostic[]) => void;
+    onError: (message: string) => void;
 }
 
 export interface MonacoEditorRef {
@@ -75,8 +78,35 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
     props: MonacoEditorProps,
     ref: ForwardedRef<MonacoEditorRef>
 ) {
+    const { initialCode, settings, ...callbacks } = props;
+
     const monaco = useMonaco();
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
+
+    const [lspSession, setLspSession] = useState<LspSession>(
+        () => new LspSession(initialCode, settings)
+    );
+    const [diagnostics, setDiagnostics] = useState<Diagnostic[]>([]);
+
+    // establish an LspSession
+    useEffect(() => {
+        console.log('Creating new LSP session');
+        const session = new LspSession(initialCode, settings, {
+            onWaitingForDiagnostics: callbacks.onWaitingForDiagnostics,
+            onDiagnostics: (diag) => {
+                setDiagnostics(diag);
+                callbacks.onDiagnostics(diag);
+            },
+            onError: callbacks.onError,
+        });
+        setLspSession(session);
+
+        return () => {
+            // can't await in a cleanup function
+            session.shutdown();
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initialCode, settings]);
 
     // Capture the editor and monaco instance on mount
     function handleEditorDidMount(editor: monaco.editor.IStandaloneCodeEditor) {
@@ -134,23 +164,29 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
         if (monaco && editorRef?.current) {
             const model = editorRef.current.getModel();
             if (model) {
-                const markers = convertDiagnostics(props.diagnostics);
+                const markers = convertDiagnostics(diagnostics);
                 monaco.editor.setModelMarkers(model, 'pyright', markers);
                 // Register the editor and the LSP Client so they can be accessed
                 // by the hover provider, etc.
-                registerModel(model, props.lspClient);
+                registerModel(model, lspSession);
             }
         }
-    }, [monaco, props.diagnostics, props.lspClient]);
+    }, [monaco, diagnostics, lspSession]);
+
+    // TODO: useDebouncedCallback to avoid spamming the server
+    const onCodeChange = (value?: string) => {
+        lspSession.updateCode(value ?? '');
+        return value && props.onUpdateCode(value);
+    };
 
     return (
         <Box sx={{ flex: 1, py: 0.5 }}>
             <Editor
                 options={options}
                 language={'python'}
-                value={props.code}
-                theme="vs"
-                onChange={(value) => value && props.onUpdateCode(value)}
+                defaultValue={initialCode}
+                theme="vs-dark"
+                onChange={onCodeChange}
                 onMount={handleEditorDidMount}
             />
         </Box>
@@ -162,14 +198,14 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
 // but it's required to support the various providers (e.g. hover).
 const registeredModels: RegisteredModel[] = [];
 
-function registerModel(model: monaco.editor.ITextModel, lspClient: LspClient) {
+function registerModel(model: monaco.editor.ITextModel, lspSession: LspSession) {
     if (!registeredModels.find((m) => m.model === model)) {
-        registeredModels.push({ model, lspClient });
+        registeredModels.push({ model, lspSession });
     }
 }
 
-function getLspClientForModel(model: monaco.editor.ITextModel): LspClient | undefined {
-    return registeredModels.find((m) => m.model === model)?.lspClient;
+function getLspClientForModel(model: monaco.editor.ITextModel): LspSession | undefined {
+    return registeredModels.find((m) => m.model === model)?.lspSession;
 }
 
 // #region - Monaco Request Handlers
@@ -178,13 +214,13 @@ async function handleHoverRequest(
     model: monaco.editor.ITextModel,
     position: monaco.Position
 ): Promise<monaco.languages.Hover | null> {
-    const lspClient = getLspClientForModel(model);
-    if (!lspClient) {
+    const lspSession = getLspClientForModel(model);
+    if (!lspSession) {
         return null;
     }
 
     try {
-        const hoverInfo = await lspClient.getHoverForPosition(model.getValue(), {
+        const hoverInfo = await lspSession.getHoverForPosition(model.getValue(), {
             line: position.lineNumber - 1,
             character: position.column - 1,
         });
@@ -207,13 +243,13 @@ async function handleRenameRequest(
     position: monaco.Position,
     newName: string
 ): Promise<monaco.languages.WorkspaceEdit | null> {
-    const lspClient = getLspClientForModel(model);
-    if (!lspClient) {
+    const lspSession = getLspClientForModel(model);
+    if (!lspSession) {
         return null;
     }
 
     try {
-        const renameEdits = await lspClient.getRenameEditsForPosition(
+        const renameEdits = await lspSession.getRenameEditsForPosition(
             model.getValue(),
             {
                 line: position.lineNumber - 1,
@@ -251,13 +287,13 @@ async function handleSignatureHelpRequest(
     model: monaco.editor.ITextModel,
     position: monaco.Position
 ): Promise<monaco.languages.SignatureHelpResult | null> {
-    const lspClient = getLspClientForModel(model);
-    if (!lspClient) {
+    const lspSession = getLspClientForModel(model);
+    if (!lspSession) {
         return null;
     }
 
     try {
-        const sigInfo = await lspClient.getSignatureHelpForPosition(model.getValue(), {
+        const sigInfo = await lspSession.getSignatureHelpForPosition(model.getValue(), {
             line: position.lineNumber - 1,
             character: position.column - 1,
         });
@@ -286,13 +322,13 @@ async function handleProvideCompletionRequest(
     model: monaco.editor.ITextModel,
     position: monaco.Position
 ): Promise<monaco.languages.CompletionList | null> {
-    const lspClient = getLspClientForModel(model);
-    if (!lspClient) {
+    const lspSession = getLspClientForModel(model);
+    if (!lspSession) {
         return null;
     }
 
     try {
-        const completionInfo = await lspClient.getCompletionForPosition(model.getValue(), {
+        const completionInfo = await lspSession.getCompletionForPosition(model.getValue(), {
             line: position.lineNumber - 1,
             character: position.column - 1,
         });
@@ -316,13 +352,13 @@ async function handleResolveCompletionRequest(
         return null;
     }
 
-    const lspClient = getLspClientForModel(item.sourceModel);
-    if (!lspClient) {
+    const lspSession = getLspClientForModel(item.sourceModel);
+    if (!lspSession) {
         return null;
     }
 
     try {
-        const result = await lspClient.resolveCompletionItem(item.originalLspItem);
+        const result = await lspSession.resolveCompletionItem(item.originalLspItem);
         return convertCompletionItem(result, item.sourceModel);
     } catch {
         return null;
