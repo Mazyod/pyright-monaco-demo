@@ -44,12 +44,6 @@ const completionItemSchema = z.object({
 
 type CodeWithOptions = z.infer<typeof codeWithOptionsSchema>;
 
-// Retrieves the current status of the service including the
-// versions of pyright that it supports.
-export function getStatus(req: Request, res: Response) {
-    res.status(200).json({ pyrightVersions: [] });
-}
-
 // Creates a new language server session and returns its ID.
 export function createSession(req: Request, res: Response) {
     const sessionOptions = validateSessionOptions(req, res);
@@ -228,11 +222,6 @@ export function resolveCompletion(req: Request, res: Response) {
 }
 
 function validateSessionOptions(req: Request, res: Response): SessionOptions | undefined {
-    if (!req.body || typeof req.body !== 'object') {
-        res.status(400).json({ message: 'Invalid request body' });
-        return undefined;
-    }
-
     const result = sessionOptionsSchema.safeParse(req.body);
     if (!result.success) {
         res.status(400).json({ message: result.error.message });

@@ -24,21 +24,11 @@ export interface HoverInfo {
     range: Range;
 }
 
-export interface ServerStatus {
-    pyrightVersions: string[];
-}
-
 // Number of attempts to create a new session before giving up.
 const maxErrorCount = 4;
 
-let appServerApiAddressPrefix = 'https://pyright-playground.azurewebsites.net/api/';
-
-// TODO - this is for local debugging in the browser. Remove for
-// React Native code.
-const currentUrl = new URL(window.location.href);
-if (currentUrl.hostname === 'localhost') {
-    appServerApiAddressPrefix = 'http://localhost:3000/api/';
-}
+// TODO: use environment variables
+const appServerApiAddressPrefix = 'http://localhost:8080/lsp/';
 
 export class LspSession {
     private _sessionId: string | undefined;
@@ -57,12 +47,6 @@ export class LspSession {
         // When creating a new session, we can send the initial
         // code to the server to speed up initialization.
         this._initialCode = text;
-    }
-
-    static async getPyrightServiceStatus(): Promise<ServerStatus> {
-        const endpoint = appServerApiAddressPrefix + `status`;
-        const data = await endpointRequest('GET', endpoint);
-        return { pyrightVersions: data.pyrightVersions };
     }
 
     async getDiagnostics(code: string): Promise<Diagnostic[]> {

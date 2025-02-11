@@ -10,7 +10,6 @@ import {
     createSession,
     closeSession,
     getHoverInfo,
-    getStatus,
     getSignatureHelp,
     getCompletion,
     resolveCompletion,
@@ -30,10 +29,6 @@ const corsOptions: CorsOptions = {
 };
 
 router.use(cors(corsOptions));
-
-router.get('/status', (req, res) => {
-    getStatus(req, res);
-});
 
 router.post('/session', (req, res) => {
     createSession(req, res);
