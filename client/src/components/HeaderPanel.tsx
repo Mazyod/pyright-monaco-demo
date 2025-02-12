@@ -35,7 +35,7 @@ const styles = {
         pb: 0.25,
         alignSelf: 'stretch',
         alignItems: 'center',
-        bgcolor: '#336',
+        bgcolor: '#933',
         height: 42,
     },
     pyrightIcon: {

@@ -134,7 +134,7 @@ const styles = {
     header: {
         height: 32,
         px: 1,
-        bgcolor: '#336',
+        bgcolor: '#933',
         display: 'flex',
         flexDirection: 'row',
         alignSelf: 'stretch',

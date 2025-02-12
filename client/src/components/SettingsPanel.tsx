@@ -114,7 +114,7 @@ function MenuButton(props: { onPress: () => void }) {
             icon="down-circle"
             iconSize={18}
             color="#669"
-            hoverColor="#336"
+            hoverColor="#933"
             onPress={props.onPress}
         />
     );

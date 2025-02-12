@@ -3,8 +3,8 @@
 ## About this Fork
 
 > [!IMPORTANT]
-> This fork of Pyright Playground is focused on reducing the code an, making it easier to understand the key parts.
-> It removes the dynamic Pyright download, switching versions, `react-native`, etc.
+> This fork of Pyright Playground is focused on demonstrating the Pyright - Monaco Editor integration by reducing the code and reorganizing it to reusable parts.
+> You should essentially be able to copy/paste the `LSPSession` and `MonacoEditor` and with relative easy integrated them with your own projects.
 
 ![image](https://github.com/user-attachments/assets/bbaa6d85-6ceb-46c8-85b4-fb73f68298f9)
 

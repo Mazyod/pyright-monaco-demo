@@ -92,12 +92,16 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
     useEffect(() => {
         console.log('Creating new LSP session');
         const session = new LspSession(initialCode, settings, {
-            onWaitingForDiagnostics: callbacks.onWaitingForDiagnostics,
+            onWaitingForDiagnostics: (isWaiting) => {
+                callbacks.onWaitingForDiagnostics(isWaiting);
+            },
             onDiagnostics: (diag) => {
                 setDiagnostics(diag);
                 callbacks.onDiagnostics(diag);
             },
-            onError: callbacks.onError,
+            onError: (message) => {
+                callbacks.onError(message);
+            },
         });
         setLspSession(session);
 
@@ -105,7 +109,7 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
             // can't await in a cleanup function
             session.shutdown();
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialCode, settings]);
 
     // Capture the editor and monaco instance on mount
@@ -185,7 +189,7 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
                 options={options}
                 language={'python'}
                 defaultValue={initialCode}
-                theme="vs-dark"
+                theme="light"
                 onChange={onCodeChange}
                 onMount={handleEditorDidMount}
             />
