@@ -3,12 +3,9 @@
  * Interface that defines the settings for the pyright playground.
  */
 
-export interface PlaygroundSettings {
-    strictMode?: boolean;
-    configOverrides: { [name: string]: boolean };
-}
+import type { PyrightSettings } from './MonacoEditor';
 
 export interface PlaygroundState {
     code: string;
-    settings: PlaygroundSettings;
+    settings: PyrightSettings;
 }

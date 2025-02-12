@@ -8,7 +8,6 @@ import { useRef } from 'react';
 import { CheckmarkMenu, CheckmarkMenuItem } from './CheckmarkMenu';
 import IconButton from './IconButton';
 import { Menu, MenuRef } from './Menu';
-import { PlaygroundSettings } from './PlaygroundSettings';
 import PushButton from './PushButton';
 import {
     PyrightConfigSetting,
@@ -16,6 +15,7 @@ import {
     configSettingsAlphabetized,
 } from './PyrightConfigSettings';
 import { SettingsCheckbox } from './SettingsCheckBox';
+import type { PyrightSettings } from './MonacoEditor';
 
 interface ConfigOptionWithValue {
     name: string;
@@ -23,8 +23,8 @@ interface ConfigOptionWithValue {
 }
 
 export interface SettingsPanelProps {
-    settings: PlaygroundSettings;
-    onUpdateSettings: (settings: PlaygroundSettings) => void;
+    settings: PyrightSettings;
+    onUpdateSettings: (settings: PyrightSettings) => void;
 }
 
 export function SettingsPanel(props: SettingsPanelProps) {
@@ -158,11 +158,11 @@ function ConfigOverride(props: ConfigOverrideProps) {
     );
 }
 
-function areSettingsDefault(settings: PlaygroundSettings): boolean {
+function areSettingsDefault(settings: PyrightSettings): boolean {
     return Object.keys(settings.configOverrides).length === 0 && !settings.strictMode;
 }
 
-function getNonDefaultConfigOptions(settings: PlaygroundSettings): ConfigOptionWithValue[] {
+function getNonDefaultConfigOptions(settings: PyrightSettings): ConfigOptionWithValue[] {
     const overrides: ConfigOptionWithValue[] = [];
 
     configSettingsAlphabetized.forEach((configInfo) => {
@@ -184,7 +184,7 @@ function getNonDefaultConfigOptions(settings: PlaygroundSettings): ConfigOptionW
 }
 
 function getConfigOptionMenuItem(
-    settings: PlaygroundSettings,
+    settings: PyrightSettings,
     config: PyrightConfigSetting
 ): CheckmarkMenuItem {
     const isEnabled = settings.configOverrides[config.name] ?? config.isEnabledInStandard;
@@ -197,7 +197,7 @@ function getConfigOptionMenuItem(
     };
 }
 
-function toggleConfigOption(settings: PlaygroundSettings, optionName: string): PlaygroundSettings {
+function toggleConfigOption(settings: PyrightSettings, optionName: string): PyrightSettings {
     const configOverrides = { ...settings.configOverrides };
     const configInfo = configSettings.find((s) => s.name === optionName);
     const isEnabledByDefault = configInfo?.isEnabledInStandard;

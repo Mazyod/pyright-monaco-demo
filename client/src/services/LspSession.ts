@@ -13,7 +13,7 @@ import type {
     WorkspaceEdit,
 } from 'vscode-languageserver-types';
 import { endpointRequest } from './EndpointUtils';
-import { PlaygroundSettings } from '@/components/PlaygroundSettings';
+import { PyrightSettings } from '@/components/MonacoEditor';
 
 export interface DiagnosticEvents {
     onWaitingForDiagnostics: (isWaiting: boolean) => void;
@@ -36,18 +36,14 @@ const maxErrorCount = 4;
 const appServerApiAddressPrefix = 'http://localhost:8080/lsp/';
 
 export class LspSession {
-    private readonly _settings: PlaygroundSettings | undefined;
+    private readonly _settings: PyrightSettings | undefined;
     private readonly _eventHandlers?: DiagnosticEvents;
 
     private _sessionId: string | undefined;
     private _code;
     private _version: number;
 
-    constructor(
-        initialCode: string,
-        settings: PlaygroundSettings,
-        eventHandlers?: DiagnosticEvents
-    ) {
+    constructor(initialCode: string, settings: PyrightSettings, eventHandlers?: DiagnosticEvents) {
         // When creating a new session, we can send the initial
         // code to the server to speed up initialization.
         this._code = initialCode;

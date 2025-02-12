@@ -17,7 +17,6 @@ import {
     TextDocumentEdit,
 } from 'vscode-languageserver-types';
 import { LspSession } from '@/services/LspSession';
-import type { PlaygroundSettings } from './PlaygroundSettings';
 
 interface ExtendedCompletionItem extends monaco.languages.CompletionItem {
     originalLspItem: CompletionItem;
@@ -57,9 +56,14 @@ interface RegisteredModel {
     lspSession: LspSession;
 }
 
+export interface PyrightSettings {
+    strictMode?: boolean;
+    configOverrides: { [name: string]: boolean };
+}
+
 export interface MonacoEditorProps {
     initialCode: string;
-    settings: PlaygroundSettings;
+    settings: PyrightSettings;
 
     // callbacks
     onUpdateCode: (code: string) => void;
