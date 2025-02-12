@@ -3,9 +3,9 @@
  * Interface that defines the settings for the pyright playground.
  */
 
-import type { PyrightSettings } from './MonacoEditor';
+import { LspSettings } from '@/services/LspSession';
 
 export interface PlaygroundState {
     code: string;
-    settings: PyrightSettings;
+    settings: LspSettings;
 }

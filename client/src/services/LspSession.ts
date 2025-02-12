@@ -13,7 +13,6 @@ import type {
     WorkspaceEdit,
 } from 'vscode-languageserver-types';
 import { endpointRequest } from './EndpointUtils';
-import { PyrightSettings } from '@/components/MonacoEditor';
 
 export interface DiagnosticEvents {
     onWaitingForDiagnostics: (isWaiting: boolean) => void;
@@ -35,15 +34,20 @@ const maxErrorCount = 4;
 // TODO: use environment variables
 const appServerApiAddressPrefix = 'http://localhost:8080/lsp/';
 
+export interface LspSettings {
+    strictMode?: boolean;
+    configOverrides: { [name: string]: boolean };
+}
+
 export class LspSession {
-    private readonly _settings: PyrightSettings | undefined;
+    private readonly _settings: LspSettings | undefined;
     private readonly _eventHandlers?: DiagnosticEvents;
 
     private _sessionId: string | undefined;
     private _code;
     private _version: number;
 
-    constructor(initialCode: string, settings: PyrightSettings, eventHandlers?: DiagnosticEvents) {
+    constructor(initialCode: string, settings: LspSettings, eventHandlers?: DiagnosticEvents) {
         // When creating a new session, we can send the initial
         // code to the server to speed up initialization.
         this._code = initialCode;

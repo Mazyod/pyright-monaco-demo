@@ -5,13 +5,13 @@
 
 import { Box, Typography } from '@mui/material';
 import { SettingsPanel } from './SettingsPanel';
-import type { PyrightSettings } from './MonacoEditor';
+import { LspSettings } from '@/services/LspSession';
 
 export interface RightPanelProps {
-    settings: PyrightSettings;
+    settings: LspSettings;
     code: string;
-    
-    onUpdateSettings: (settings: PyrightSettings) => void;
+
+    onUpdateSettings: (settings: LspSettings) => void;
 }
 
 const rightPanelWidth = 320;

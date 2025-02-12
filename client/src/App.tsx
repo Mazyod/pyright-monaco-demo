@@ -11,14 +11,15 @@ import {
     getInitialStateFromLocalStorage,
     setStateToLocalStorage,
 } from './services/LocalStorageUtils';
-import { MonacoEditor, MonacoEditorRef, PyrightSettings } from '@/components/MonacoEditor';
+import { MonacoEditor, MonacoEditorRef } from '@/components/MonacoEditor';
 import { ProblemsPanel } from '@/components/ProblemsPanel';
 import { RightPanel } from '@/components/RightPanel';
+import { LspSettings } from '@/services/LspSession';
 
 export interface AppState {
     code: string;
     diagnostics: Diagnostic[];
-    settings: PyrightSettings;
+    settings: LspSettings;
 
     isWaitingForResponse: boolean;
 }
@@ -92,7 +93,7 @@ export default function App() {
                 />
                 <RightPanel
                     settings={appState.settings}
-                    onUpdateSettings={(settings: PyrightSettings) => {
+                    onUpdateSettings={(settings: LspSettings) => {
                         setAppState((prevState) => ({
                             ...prevState,
                             settings,

@@ -56,14 +56,9 @@ interface RegisteredModel {
     lspSession: LspSession;
 }
 
-export interface PyrightSettings {
-    strictMode?: boolean;
-    configOverrides: { [name: string]: boolean };
-}
-
 export interface MonacoEditorProps {
     initialCode: string;
-    settings: PyrightSettings;
+    settings: LspSettings;
 
     // callbacks
     onUpdateCode: (code: string) => void;

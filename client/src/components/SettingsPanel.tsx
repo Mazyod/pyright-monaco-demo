@@ -15,7 +15,7 @@ import {
     configSettingsAlphabetized,
 } from './PyrightConfigSettings';
 import { SettingsCheckbox } from './SettingsCheckBox';
-import type { PyrightSettings } from './MonacoEditor';
+import { LspSettings } from '@/services/LspSession';
 
 interface ConfigOptionWithValue {
     name: string;
@@ -23,8 +23,8 @@ interface ConfigOptionWithValue {
 }
 
 export interface SettingsPanelProps {
-    settings: PyrightSettings;
-    onUpdateSettings: (settings: PyrightSettings) => void;
+    settings: LspSettings;
+    onUpdateSettings: (settings: LspSettings) => void;
 }
 
 export function SettingsPanel(props: SettingsPanelProps) {
@@ -158,11 +158,11 @@ function ConfigOverride(props: ConfigOverrideProps) {
     );
 }
 
-function areSettingsDefault(settings: PyrightSettings): boolean {
+function areSettingsDefault(settings: LspSettings): boolean {
     return Object.keys(settings.configOverrides).length === 0 && !settings.strictMode;
 }
 
-function getNonDefaultConfigOptions(settings: PyrightSettings): ConfigOptionWithValue[] {
+function getNonDefaultConfigOptions(settings: LspSettings): ConfigOptionWithValue[] {
     const overrides: ConfigOptionWithValue[] = [];
 
     configSettingsAlphabetized.forEach((configInfo) => {
@@ -184,7 +184,7 @@ function getNonDefaultConfigOptions(settings: PyrightSettings): ConfigOptionWith
 }
 
 function getConfigOptionMenuItem(
-    settings: PyrightSettings,
+    settings: LspSettings,
     config: PyrightConfigSetting
 ): CheckmarkMenuItem {
     const isEnabled = settings.configOverrides[config.name] ?? config.isEnabledInStandard;
@@ -197,7 +197,7 @@ function getConfigOptionMenuItem(
     };
 }
 
-function toggleConfigOption(settings: PyrightSettings, optionName: string): PyrightSettings {
+function toggleConfigOption(settings: LspSettings, optionName: string): LspSettings {
     const configOverrides = { ...settings.configOverrides };
     const configInfo = configSettings.find((s) => s.name === optionName);
     const isEnabledByDefault = configInfo?.isEnabledInStandard;
