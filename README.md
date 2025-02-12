@@ -4,7 +4,8 @@
 
 > [!IMPORTANT]
 > This fork of Pyright Playground is focused on demonstrating the Pyright - Monaco Editor integration by reducing the code and reorganizing it to reusable parts.
-> You should essentially be able to copy/paste the `LSPSession` and `MonacoEditor` and with relative easy integrated them with your own projects.
+>
+> A lot of effort was put into reorganizing the code to make it more modular and reusable. You should essentially be able to copy/paste the `LspSession` and `MonacoEditor` and with relative ease integrated them with your own projects.
 
 <img width="820" alt="image" src="https://github.com/user-attachments/assets/bc999ed5-7f4a-488c-85fc-0a43a171ec23" />
 
