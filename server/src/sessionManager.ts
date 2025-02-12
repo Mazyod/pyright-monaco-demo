@@ -251,11 +251,7 @@ function getCompatibleInactiveSession(sessionOptions?: SessionOptions): Session 
     logger.info(`Looking for compatible inactive session`);
 
     const sessionIndex = inactiveSessions.findIndex((session) => {
-        if (
-            sessionOptions?.pythonVersion !== session.options?.pythonVersion ||
-            sessionOptions?.pythonPlatform !== session.options?.pythonPlatform ||
-            sessionOptions?.typeCheckingMode !== session.options?.typeCheckingMode
-        ) {
+        if (sessionOptions?.typeCheckingMode !== session.options?.typeCheckingMode) {
             return false;
         }
 
@@ -290,19 +286,10 @@ function synthesizeVenvDirectory(tempDirPath: string) {
 
 function synthesizePyrightConfigFile(tempDirPath: string, sessionOptions?: SessionOptions) {
     const configFilePath = path.join(tempDirPath, 'pyrightconfig.json');
-    const config: any = {};
-
-    if (sessionOptions?.pythonVersion) {
-        config.pythonVersion = sessionOptions.pythonVersion;
-    } else {
-        config.pythonVersion = defaultPythonVersion;
-    }
-
-    if (sessionOptions?.pythonPlatform) {
-        config.pythonPlatform = sessionOptions.pythonPlatform;
-    } else {
-        config.pythonPlatform = defaultPythonPlatform;
-    }
+    const config: any = {
+        pythonVersion: defaultPythonVersion,
+        pythonPlatform: defaultPythonPlatform,
+    };
 
     if (sessionOptions?.typeCheckingMode === 'strict') {
         config.typeCheckingMode = 'strict';

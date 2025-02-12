@@ -23,11 +23,6 @@ const codeWithOptionsSchema = z.object({
 });
 
 const sessionOptionsSchema = z.object({
-    pythonVersion: z
-        .string()
-        .regex(/3.[0-9]+/)
-        .optional(),
-    pythonPlatform: z.string().optional(),
     typeCheckingMode: z.literal('strict').optional(),
     configOverrides: z.record(z.boolean()).optional(),
     code: z.string().optional(),

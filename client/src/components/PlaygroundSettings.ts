@@ -6,8 +6,6 @@
 export interface PlaygroundSettings {
     strictMode?: boolean;
     configOverrides: { [name: string]: boolean };
-    pythonVersion?: string;
-    pythonPlatform?: string;
 }
 
 export interface PlaygroundState {

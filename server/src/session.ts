@@ -11,8 +11,6 @@ import { LspClient } from './lspClient';
 export type SessionId = string;
 
 export interface SessionOptions {
-    pythonVersion?: string;
-    pythonPlatform?: string;
     typeCheckingMode?: string;
     configOverrides?: { [name: string]: boolean };
     code?: string;

@@ -184,21 +184,11 @@ export class LspSession {
             return Promise.resolve(this._sessionId);
         }
 
-        let pythonVersion: string | undefined;
-        let pythonPlatform: string | undefined;
         let typeCheckingMode: 'strict' | undefined;
         let code: string | undefined;
         let configOverrides: { [name: string]: boolean } | undefined;
 
         if (this._settings) {
-            if (this._settings.pythonVersion) {
-                pythonVersion = this._settings.pythonVersion;
-            }
-
-            if (this._settings.pythonPlatform) {
-                pythonPlatform = this._settings.pythonPlatform;
-            }
-
             if (this._settings.strictMode) {
                 typeCheckingMode = 'strict';
             }
@@ -209,8 +199,6 @@ export class LspSession {
 
         const endpoint = appServerApiAddressPrefix + `session`;
         const data = await endpointRequest('POST', endpoint, {
-            pythonVersion,
-            pythonPlatform,
             typeCheckingMode,
             code,
             configOverrides,

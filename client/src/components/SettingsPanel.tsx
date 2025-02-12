@@ -159,12 +159,7 @@ function ConfigOverride(props: ConfigOverrideProps) {
 }
 
 function areSettingsDefault(settings: PlaygroundSettings): boolean {
-    return (
-        Object.keys(settings.configOverrides).length === 0 &&
-        !settings.strictMode &&
-        settings.pythonVersion === undefined &&
-        settings.pythonPlatform === undefined
-    );
+    return Object.keys(settings.configOverrides).length === 0 && !settings.strictMode;
 }
 
 function getNonDefaultConfigOptions(settings: PlaygroundSettings): ConfigOptionWithValue[] {
