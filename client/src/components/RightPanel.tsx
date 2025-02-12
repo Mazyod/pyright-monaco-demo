@@ -5,12 +5,13 @@
 
 import { Box, Typography } from '@mui/material';
 import { SettingsPanel } from './SettingsPanel';
-import { PlaygroundSettings } from './PlaygroundSettings';
+import type { PyrightSettings } from './MonacoEditor';
 
 export interface RightPanelProps {
-    settings: PlaygroundSettings;
-    onUpdateSettings: (settings: PlaygroundSettings) => void;
+    settings: PyrightSettings;
     code: string;
+    
+    onUpdateSettings: (settings: PyrightSettings) => void;
 }
 
 const rightPanelWidth = 320;
@@ -36,7 +37,6 @@ const styles = {
         bgcolor: '#f8f8ff',
     },
     contentContainer: {
-        flexGrow: 1,
         flexShrink: 0,
         flexBasis: 0,
         display: 'flex',
