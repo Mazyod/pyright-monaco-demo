@@ -15,7 +15,6 @@ export interface SessionOptions {
     pythonPlatform?: string;
     typeCheckingMode?: string;
     configOverrides?: { [name: string]: boolean };
-    locale?: string;
     code?: string;
 }
 

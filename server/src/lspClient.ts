@@ -90,10 +90,6 @@ export class LspClient {
             },
         };
 
-        if (sessionOptions?.locale) {
-            init.locale = sessionOptions.locale;
-        }
-
         this._documentText = sessionOptions?.code ?? '';
 
         await this._connection.sendRequest(InitializeRequest.type, init);

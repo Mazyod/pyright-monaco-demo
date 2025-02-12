@@ -189,7 +189,6 @@ export class LspSession {
         let typeCheckingMode: 'strict' | undefined;
         let code: string | undefined;
         let configOverrides: { [name: string]: boolean } | undefined;
-        let locale: string | undefined;
 
         if (this._settings) {
             if (this._settings.pythonVersion) {
@@ -206,7 +205,6 @@ export class LspSession {
 
             code = this._code;
             configOverrides = { ...this._settings.configOverrides };
-            locale = this._settings.locale ?? navigator.language;
         }
 
         const endpoint = appServerApiAddressPrefix + `session`;
@@ -216,7 +214,6 @@ export class LspSession {
             typeCheckingMode,
             code,
             configOverrides,
-            locale,
         });
         this._sessionId = data.sessionId;
         return data.sessionId;

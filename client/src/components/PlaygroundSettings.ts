@@ -8,7 +8,6 @@ export interface PlaygroundSettings {
     configOverrides: { [name: string]: boolean };
     pythonVersion?: string;
     pythonPlatform?: string;
-    locale?: string;
 }
 
 export interface PlaygroundState {

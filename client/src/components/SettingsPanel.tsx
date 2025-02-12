@@ -163,8 +163,7 @@ function areSettingsDefault(settings: PlaygroundSettings): boolean {
         Object.keys(settings.configOverrides).length === 0 &&
         !settings.strictMode &&
         settings.pythonVersion === undefined &&
-        settings.pythonPlatform === undefined &&
-        settings.locale === undefined
+        settings.pythonPlatform === undefined
     );
 }
 

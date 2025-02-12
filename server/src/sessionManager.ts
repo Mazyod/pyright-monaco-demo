@@ -104,13 +104,7 @@ function startSession(binaryDirPath: string, sessionOptions?: SessionOptions): P
         // the server's docker container.
         synthesizeVenvDirectory(tempDirPath);
 
-        // Set the environment variable for the locale. Older versions
-        // of pyright don't handle the local passed via the LSP initialize
-        // request.
         const env = { ...process.env };
-        if (sessionOptions?.locale) {
-            env.LC_ALL = sessionOptions.locale;
-        }
 
         const langServerProcess = fork(
             binaryPath,
@@ -260,7 +254,6 @@ function getCompatibleInactiveSession(sessionOptions?: SessionOptions): Session 
         if (
             sessionOptions?.pythonVersion !== session.options?.pythonVersion ||
             sessionOptions?.pythonPlatform !== session.options?.pythonPlatform ||
-            sessionOptions?.locale !== session.options?.locale ||
             sessionOptions?.typeCheckingMode !== session.options?.typeCheckingMode
         ) {
             return false;

@@ -7,7 +7,6 @@
 import Editor, { useMonaco } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { ForwardedRef, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Box } from '@mui/material';
 import {
     CompletionItem,
     CompletionItemKind,
@@ -18,7 +17,7 @@ import {
     TextDocumentEdit,
 } from 'vscode-languageserver-types';
 import { LspSession } from '@/services/LspSession';
-import { PlaygroundSettings } from './PlaygroundSettings';
+import type { PlaygroundSettings } from './PlaygroundSettings';
 
 interface ExtendedCompletionItem extends monaco.languages.CompletionItem {
     originalLspItem: CompletionItem;
@@ -90,7 +89,6 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
 
     // establish an LspSession
     useEffect(() => {
-        console.log('Creating new LSP session');
         const session = new LspSession(initialCode, settings, {
             onWaitingForDiagnostics: (isWaiting) => {
                 callbacks.onWaitingForDiagnostics(isWaiting);
@@ -184,16 +182,14 @@ export const MonacoEditor = forwardRef(function MonacoEditor(
     };
 
     return (
-        <Box sx={{ flex: 1, py: 0.5 }}>
-            <Editor
-                options={options}
-                language={'python'}
-                defaultValue={initialCode}
-                theme="light"
-                onChange={onCodeChange}
-                onMount={handleEditorDidMount}
-            />
-        </Box>
+        <Editor
+            options={options}
+            language={'python'}
+            defaultValue={initialCode}
+            theme="light"
+            onChange={onCodeChange}
+            onMount={handleEditorDidMount}
+        />
     );
 });
 

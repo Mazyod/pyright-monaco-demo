@@ -30,7 +30,6 @@ const sessionOptionsSchema = z.object({
     pythonPlatform: z.string().optional(),
     typeCheckingMode: z.literal('strict').optional(),
     configOverrides: z.record(z.boolean()).optional(),
-    locale: z.string().optional(),
     code: z.string().optional(),
 });
 
