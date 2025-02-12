@@ -10,7 +10,7 @@ import { HeaderPanel } from '@/components/HeaderPanel';
 import {
     getInitialStateFromLocalStorage,
     setStateToLocalStorage,
-} from './services/LocalStorageUtils';
+} from '@/services/LocalStorageUtils';
 import { MonacoEditor, MonacoEditorRef } from '@/components/MonacoEditor';
 import { ProblemsPanel } from '@/components/ProblemsPanel';
 import { RightPanel } from '@/components/RightPanel';
