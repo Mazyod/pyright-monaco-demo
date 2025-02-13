@@ -13,7 +13,7 @@ import {
 } from '@/services/LocalStorageUtils';
 import { ProblemsPanel } from '@/components/ProblemsPanel';
 import { RightPanel } from '@/components/RightPanel';
-import { LspSettings } from '@/services/LspSession';
+import type { LspSettings } from '@/LspMonaco/services/LspSession';
 import { Editor } from '@monaco-editor/react';
 import { editorOptions, useMonacoLsp } from './LspMonaco';
 
@@ -37,11 +37,12 @@ export default function App() {
         settings: lspSettings,
     });
 
-    const errorDiagnostics = useMemo<Diagnostic[] | null>(() => {
+    const sessionError = useMemo<Diagnostic[] | null>(() => {
         if (!error) {
             return null;
         }
 
+        // Map the session error to a diagnostic.
         const message = `An error occurred when attempting to contact the pyright web service\n    ${error}`;
         return [
             {
@@ -94,7 +95,7 @@ export default function App() {
                 />
             </Box>
             <ProblemsPanel
-                diagnostics={errorDiagnostics ?? diagnostics}
+                diagnostics={sessionError ?? diagnostics}
                 onSelectRange={(range) => {
                     editorRef.selectRange(range);
                 }}

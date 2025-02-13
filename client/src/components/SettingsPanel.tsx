@@ -15,7 +15,7 @@ import {
     configSettingsAlphabetized,
 } from './PyrightConfigSettings';
 import { SettingsCheckbox } from './SettingsCheckBox';
-import { LspSettings } from '@/services/LspSession';
+import type { LspSettings } from '@/LspMonaco/services/LspSession';
 
 interface ConfigOptionWithValue {
     name: string;

@@ -5,7 +5,7 @@
 
 import { Box, Typography } from '@mui/material';
 import { SettingsPanel } from './SettingsPanel';
-import { LspSettings } from '@/services/LspSession';
+import type { LspSettings } from '@/LspMonaco/services/LspSession';
 
 export interface RightPanelProps {
     settings: LspSettings;

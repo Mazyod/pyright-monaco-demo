@@ -3,7 +3,7 @@
  * Interface that defines the settings for the pyright playground.
  */
 
-import { LspSettings } from '@/services/LspSession';
+import type { LspSettings } from '@/LspMonaco/services/LspSession';
 
 export interface PlaygroundState {
     code: string;
