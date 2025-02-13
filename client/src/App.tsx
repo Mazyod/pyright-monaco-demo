@@ -36,8 +36,10 @@ export default function App() {
         handleCodeChange,
     } = useMonacoLsp({
         initialCode: initialState.code,
-        settings: lspSettings,
-        apiAddressPrefix,
+        lspConfig: {
+            settings: lspSettings,
+            apiAddressPrefix,
+        },
     });
 
     const sessionError = useMemo<Diagnostic[] | null>(() => {

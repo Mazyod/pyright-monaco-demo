@@ -29,7 +29,6 @@ export interface HoverInfo {
 }
 
 export interface LspConfig {
-    initialCode: string;
     settings: LspSettings;
     apiAddressPrefix: string;
     // Number of attempts to create a new session before giving up.
@@ -58,9 +57,6 @@ export class LspSession {
         this._apiAddressPrefix = config.apiAddressPrefix;
         this._maxErrorCount = config.maxErrorCount || 4;
         this._eventHandlers = eventHandlers;
-        // When creating a new session, we can send the initial
-        // code to the server to speed up initialization.
-        this.updateCode(config.initialCode)
     }
 
     async shutdown() {

@@ -8,7 +8,10 @@ import { useLspSession } from './useLspSession';
 import { useMonacoProviders } from './useMonacoProviders';
 import useDebounce from './useDebounce';
 
-type UseMonacoLspProps = LspConfig;
+interface UseMonacoLspProps {
+    initialCode: string;
+    lspConfig: LspConfig;
+}
 
 export interface MonacoEditorRef {
     focus: () => void;
@@ -37,9 +40,7 @@ export const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions =
 
 export function useMonacoLsp({
     initialCode,
-    settings,
-    apiAddressPrefix,
-    maxErrorCount,
+    lspConfig: { settings, apiAddressPrefix, maxErrorCount },
 }: UseMonacoLspProps) {
     const monacoRef = useRef<typeof monaco>();
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
@@ -47,19 +48,24 @@ export function useMonacoLsp({
     const [code, setCode] = useState(initialCode);
 
     // Memoize the props to avoid re-creating the lsp session
-    const memoizedProps = useMemo<UseMonacoLspProps>(
-        () => ({ initialCode, settings, apiAddressPrefix, maxErrorCount }),
-        [initialCode, settings, apiAddressPrefix, maxErrorCount]
+    const memoizedConfig = useMemo<LspConfig>(
+        () => ({ settings, apiAddressPrefix, maxErrorCount }),
+        [settings, apiAddressPrefix, maxErrorCount]
     );
 
     const { lspSession, isWaitingForDiagnostics, diagnostics, error } =
-        useLspSession(memoizedProps);
+        useLspSession(memoizedConfig);
 
     // Register providers when the editor is mounted
     useMonacoProviders({
         model: editorRef.current?.getModel() ?? null,
         lspSession,
     });
+
+    // Trigger initial diagnostics and subsequent updates
+    useEffect(() => {
+        lspSession.updateCode(code);
+    }, [lspSession, code]);
 
     // Render diagnostics
     useEffect(() => {
@@ -90,7 +96,6 @@ export function useMonacoLsp({
     const _handleCodeChange = (value?: string) => {
         if (value) {
             setCode(value);
-            lspSession.updateCode(value);
         }
     };
 
