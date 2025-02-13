@@ -48,18 +48,19 @@ export class LspSession {
     private readonly _eventHandlers?: DiagnosticEvents;
 
     private _sessionId: string | undefined;
-    private _code;
+    private _code: string;
     private _version: number;
 
     constructor(config: LspConfig, eventHandlers?: DiagnosticEvents) {
-        // When creating a new session, we can send the initial
-        // code to the server to speed up initialization.
-        this._code = config.initialCode;
+        this._code = '';
         this._version = 0;
         this._settings = config.settings;
         this._apiAddressPrefix = config.apiAddressPrefix;
         this._maxErrorCount = config.maxErrorCount || 4;
         this._eventHandlers = eventHandlers;
+        // When creating a new session, we can send the initial
+        // code to the server to speed up initialization.
+        this.updateCode(config.initialCode)
     }
 
     async shutdown() {
