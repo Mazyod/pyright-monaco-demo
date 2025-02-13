@@ -3,7 +3,7 @@
  * Main UI for Pyright Playground web app.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Box, SxProps } from '@mui/material';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver-types';
 import { HeaderPanel } from '@/components/HeaderPanel';
@@ -11,29 +11,51 @@ import {
     getInitialStateFromLocalStorage,
     setStateToLocalStorage,
 } from '@/services/LocalStorageUtils';
-import { MonacoEditor, MonacoEditorRef } from '@/components/MonacoEditor';
 import { ProblemsPanel } from '@/components/ProblemsPanel';
 import { RightPanel } from '@/components/RightPanel';
 import { LspSettings } from '@/services/LspSession';
-
-export interface AppState {
-    code: string;
-    diagnostics: Diagnostic[];
-    settings: LspSettings;
-
-    isWaitingForResponse: boolean;
-}
+import { Editor } from '@monaco-editor/react';
+import { editorOptions, useMonacoLsp } from './LspMonaco';
 
 const initialState = getInitialStateFromLocalStorage();
 
 export default function App() {
-    const editorRef = useRef<MonacoEditorRef>(null);
-    const [appState, setAppState] = useState<AppState>({
-        code: initialState.code,
-        settings: initialState.settings,
-        diagnostics: [],
-        isWaitingForResponse: false,
+    const [lspSettings, setLspSettings] = useState<LspSettings>(initialState.settings);
+
+    // #region - Monaco LSP
+
+    const {
+        code,
+        isWaitingForDiagnostics,
+        diagnostics,
+        error,
+        editorRef,
+        handleEditorDidMount,
+        handleCodeChange,
+    } = useMonacoLsp({
+        initialCode: initialState.code,
+        settings: lspSettings,
     });
+
+    const errorDiagnostics = useMemo<Diagnostic[] | null>(() => {
+        if (!error) {
+            return null;
+        }
+
+        const message = `An error occurred when attempting to contact the pyright web service\n    ${error}`;
+        return [
+            {
+                message,
+                severity: DiagnosticSeverity.Error,
+                range: {
+                    start: { line: 0, character: 0 },
+                    end: { line: 0, character: 0 },
+                },
+            },
+        ];
+    }, [error]);
+
+    // #endregion
 
     useEffect(() => {
         const handleKeyPress = (event: KeyboardEvent) => {
@@ -49,67 +71,38 @@ export default function App() {
     }, []);
 
     useEffect(() => {
-        setStateToLocalStorage({ code: appState.code, settings: appState.settings });
-    }, [appState.code, appState.settings]);
+        setStateToLocalStorage({ code: code, settings: lspSettings });
+    }, [code, lspSettings]);
 
     return (
         <Box sx={styles.container}>
             <HeaderPanel />
             <Box sx={styles.middlePanelContainer}>
-                <MonacoEditor
-                    ref={editorRef}
-                    initialCode={initialState.code}
-                    settings={appState.settings}
-                    onUpdateCode={(code) => {
-                        setAppState({ ...appState, code });
-                    }}
-                    onDiagnostics={(diagnostics: Diagnostic[]) => {
-                        setAppState((prevState) => ({
-                            ...prevState,
-                            diagnostics,
-                        }));
-                    }}
-                    onError={(message: string) => {
-                        setAppState((prevState) => ({
-                            ...prevState,
-                            diagnostics: [
-                                {
-                                    message: `An error occurred when attempting to contact the pyright web service\n    ${message}`,
-                                    severity: DiagnosticSeverity.Error,
-                                    range: {
-                                        start: { line: 0, character: 0 },
-                                        end: { line: 0, character: 0 },
-                                    },
-                                },
-                            ],
-                        }));
-                    }}
-                    onWaitingForDiagnostics={(isWaiting) => {
-                        setAppState((prevState) => ({
-                            ...prevState,
-                            isWaitingForResponse: isWaiting,
-                        }));
-                    }}
+                <Editor
+                    options={editorOptions}
+                    language={'python'}
+                    defaultValue={initialState.code}
+                    theme="light"
+                    onChange={handleCodeChange}
+                    onMount={handleEditorDidMount}
                 />
                 <RightPanel
-                    settings={appState.settings}
+                    settings={lspSettings}
                     onUpdateSettings={(settings: LspSettings) => {
-                        setAppState((prevState) => ({
+                        setLspSettings((prevState) => ({
                             ...prevState,
                             settings,
                         }));
                     }}
-                    code={appState.code}
+                    code={code}
                 />
             </Box>
             <ProblemsPanel
-                diagnostics={appState.diagnostics}
+                diagnostics={errorDiagnostics ?? diagnostics}
                 onSelectRange={(range) => {
-                    if (editorRef.current) {
-                        editorRef.current.selectRange(range);
-                    }
+                    editorRef.selectRange(range);
                 }}
-                displayActivityIndicator={appState.isWaitingForResponse}
+                displayActivityIndicator={isWaitingForDiagnostics}
             />
         </Box>
     );
