@@ -1,5 +1,7 @@
 # Pyright Monaco Demo
 
+[![Vite](https://img.shields.io/badge/Vite-latest-646CFF?logo=vite)](https://vitejs.dev) [![React 18](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev)
+
 ## About this Fork
 
 > [!IMPORTANT]
