@@ -89,10 +89,7 @@ export default function App() {
                 <RightPanel
                     settings={lspSettings}
                     onUpdateSettings={(settings: LspSettings) => {
-                        setLspSettings((prevState) => ({
-                            ...prevState,
-                            settings,
-                        }));
+                        setLspSettings(settings);
                     }}
                     code={code}
                 />
