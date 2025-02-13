@@ -6,6 +6,7 @@ import type { LspConfig } from '@/LspMonaco/services/LspSession';
 import { convertDiagnostics, convertRange } from '../utils/typeConversions';
 import { useLspSession } from './useLspSession';
 import { useMonacoProviders } from './useMonacoProviders';
+import useDebounce from './useDebounce';
 
 type UseMonacoLspProps = LspConfig;
 
@@ -86,12 +87,14 @@ export function useMonacoLsp({
     };
 
     // Handle code changes
-    const handleCodeChange = (value?: string) => {
+    const _handleCodeChange = (value?: string) => {
         if (value) {
             setCode(value);
             lspSession.updateCode(value);
         }
     };
+
+    const handleCodeChange = useDebounce(_handleCodeChange, 500);
 
     // Expose imperative methods
     const publicEditorRef: MonacoEditorRef = {

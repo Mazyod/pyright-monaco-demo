@@ -11,8 +11,9 @@
 
 ```typescript
 const monacoLsp = useMonacoLsp({
-    initialCode: initialState.code,
-    settings: lspSettings,
+  initialCode: initialState.code,
+  settings: lspSettings,
+  apiAddressPrefix: "...",
 });
 ```
 
