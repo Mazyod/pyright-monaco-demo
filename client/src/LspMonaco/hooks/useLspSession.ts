@@ -1,22 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Diagnostic } from 'vscode-languageserver-types';
-import { LspSession, type LspSettings } from '@/LspMonaco/services/LspSession';
+import { type LspConfig, LspSession } from '@/LspMonaco/services/LspSession';
 
-interface UseLspSessionProps {
-    initialCode: string;
-    settings: LspSettings;
-}
+type UseLspSessionProps = LspConfig;
 
-export function useLspSession({ initialCode, settings }: UseLspSessionProps) {
-    const [lspSession, setLspSession] = useState<LspSession>(
-        () => new LspSession(initialCode, settings)
-    );
+export function useLspSession(props: UseLspSessionProps) {
+    const [lspSession, setLspSession] = useState<LspSession>(() => new LspSession(props));
     const [isWaitingForDiagnostics, setIsWaitingForDiagnostics] = useState(false);
     const [diagnostics, setDiagnostics] = useState<Diagnostic[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const session = new LspSession(initialCode, settings, {
+        const session = new LspSession(props, {
             onWaitingForDiagnostics: setIsWaitingForDiagnostics,
             onDiagnostics: setDiagnostics,
             onError: setError,
@@ -26,7 +21,7 @@ export function useLspSession({ initialCode, settings }: UseLspSessionProps) {
         return () => {
             session.shutdown();
         };
-    }, [initialCode, settings]);
+    }, [props]); // NOTE: props are memoized, so this should be fine
 
     return {
         lspSession,

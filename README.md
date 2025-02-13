@@ -18,6 +18,8 @@ const monacoLsp = useMonacoLsp({
 
 <img width="820" alt="image" src="https://github.com/user-attachments/assets/bc999ed5-7f4a-488c-85fc-0a43a171ec23" />
 
+---
+
 [Pyright](https://github.com/Microsoft/pyright) is a static type checker for Python.
 
 [Pyright Playground](https://pyright-play.net) provides a web experience for running Pyright.

@@ -24,6 +24,8 @@ export default function App() {
 
     // #region - Monaco LSP
 
+    const apiAddressPrefix = 'http://localhost:8080/lsp/';
+
     const {
         code,
         isWaitingForDiagnostics,
@@ -35,6 +37,7 @@ export default function App() {
     } = useMonacoLsp({
         initialCode: initialState.code,
         settings: lspSettings,
+        apiAddressPrefix,
     });
 
     const sessionError = useMemo<Diagnostic[] | null>(() => {

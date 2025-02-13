@@ -28,11 +28,13 @@ export interface HoverInfo {
     range: Range;
 }
 
-// Number of attempts to create a new session before giving up.
-const maxErrorCount = 4;
-
-// TODO: use environment variables
-const appServerApiAddressPrefix = 'http://localhost:8080/lsp/';
+export interface LspConfig {
+    initialCode: string;
+    settings: LspSettings;
+    apiAddressPrefix: string;
+    // Number of attempts to create a new session before giving up.
+    maxErrorCount?: number;
+}
 
 export interface LspSettings {
     strictMode?: boolean;
@@ -41,18 +43,22 @@ export interface LspSettings {
 
 export class LspSession {
     private readonly _settings: LspSettings | undefined;
+    private readonly _apiAddressPrefix: string;
+    private readonly _maxErrorCount: number;
     private readonly _eventHandlers?: DiagnosticEvents;
 
     private _sessionId: string | undefined;
     private _code;
     private _version: number;
 
-    constructor(initialCode: string, settings: LspSettings, eventHandlers?: DiagnosticEvents) {
+    constructor(config: LspConfig, eventHandlers?: DiagnosticEvents) {
         // When creating a new session, we can send the initial
         // code to the server to speed up initialization.
-        this._code = initialCode;
+        this._code = config.initialCode;
         this._version = 0;
-        this._settings = settings;
+        this._settings = config.settings;
+        this._apiAddressPrefix = config.apiAddressPrefix;
+        this._maxErrorCount = config.maxErrorCount || 4;
         this._eventHandlers = eventHandlers;
     }
 
@@ -65,7 +71,7 @@ export class LspSession {
         // Immediately discard the old session ID.
         this._sessionId = undefined;
 
-        const endpoint = appServerApiAddressPrefix + `session/${sessionId}`;
+        const endpoint = this._apiAddressPrefix + `session/${sessionId}`;
         await endpointRequest('DELETE', endpoint);
     }
 
@@ -94,7 +100,7 @@ export class LspSession {
 
     async getDiagnostics(code: string): Promise<Diagnostic[]> {
         return this._doWithSession<Diagnostic[]>(async (sessionId) => {
-            const endpoint = appServerApiAddressPrefix + `session/${sessionId}/diagnostics`;
+            const endpoint = this._apiAddressPrefix + `session/${sessionId}/diagnostics`;
             const data = await endpointRequest('POST', endpoint, { code });
             return data.diagnostics;
         });
@@ -102,7 +108,7 @@ export class LspSession {
 
     async getHoverForPosition(code: string, position: Position): Promise<HoverInfo> {
         return this._doWithSession<HoverInfo>(async (sessionId) => {
-            const endpoint = appServerApiAddressPrefix + `session/${sessionId}/hover`;
+            const endpoint = this._apiAddressPrefix + `session/${sessionId}/hover`;
             const data = await endpointRequest('POST', endpoint, { code, position });
             return data.hover;
         });
@@ -114,7 +120,7 @@ export class LspSession {
         newName: string
     ): Promise<WorkspaceEdit | undefined> {
         return this._doWithSession<WorkspaceEdit>(async (sessionId) => {
-            const endpoint = appServerApiAddressPrefix + `session/${sessionId}/rename`;
+            const endpoint = this._apiAddressPrefix + `session/${sessionId}/rename`;
             const data = await endpointRequest('POST', endpoint, { code, position, newName });
             return data.edits;
         });
@@ -122,7 +128,7 @@ export class LspSession {
 
     async getSignatureHelpForPosition(code: string, position: Position): Promise<SignatureHelp> {
         return this._doWithSession<SignatureHelp>(async (sessionId) => {
-            const endpoint = appServerApiAddressPrefix + `session/${sessionId}/signature`;
+            const endpoint = this._apiAddressPrefix + `session/${sessionId}/signature`;
             const data = await endpointRequest('POST', endpoint, { code, position });
             return data.signatureHelp;
         });
@@ -130,7 +136,7 @@ export class LspSession {
 
     async getCompletionForPosition(code: string, position: Position): Promise<CompletionList> {
         return this._doWithSession<CompletionList>(async (sessionId) => {
-            const endpoint = appServerApiAddressPrefix + `session/${sessionId}/completion`;
+            const endpoint = this._apiAddressPrefix + `session/${sessionId}/completion`;
             const data = await endpointRequest('POST', endpoint, { code, position });
             return data.completionList;
         });
@@ -138,7 +144,7 @@ export class LspSession {
 
     async resolveCompletionItem(item: CompletionItem): Promise<CompletionItem> {
         return this._doWithSession<CompletionItem>(async (sessionId) => {
-            const endpoint = appServerApiAddressPrefix + `session/${sessionId}/completionresolve`;
+            const endpoint = this._apiAddressPrefix + `session/${sessionId}/completionresolve`;
             const data = await endpointRequest('POST', endpoint, { completionItem: item });
             return data.completionItem;
         });
@@ -152,7 +158,7 @@ export class LspSession {
         let backoffDelay = 100;
 
         while (true) {
-            if (errorCount > maxErrorCount) {
+            if (errorCount > this._maxErrorCount) {
                 throw new Error('Could not connect to service');
             }
 
@@ -197,7 +203,7 @@ export class LspSession {
             configOverrides = { ...this._settings.configOverrides };
         }
 
-        const endpoint = appServerApiAddressPrefix + `session`;
+        const endpoint = this._apiAddressPrefix + `session`;
         const data = await endpointRequest('POST', endpoint, {
             typeCheckingMode,
             code,

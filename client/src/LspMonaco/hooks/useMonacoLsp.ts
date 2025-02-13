@@ -1,16 +1,13 @@
 import { OnMount } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Range } from 'vscode-languageserver-types';
-import type { LspSettings } from '@/LspMonaco/services/LspSession';
+import type { LspConfig } from '@/LspMonaco/services/LspSession';
 import { convertDiagnostics, convertRange } from '../utils/typeConversions';
 import { useLspSession } from './useLspSession';
 import { useMonacoProviders } from './useMonacoProviders';
 
-export interface UseMonacoLspProps {
-    initialCode: string;
-    settings: LspSettings;
-}
+type UseMonacoLspProps = LspConfig;
 
 export interface MonacoEditorRef {
     focus: () => void;
@@ -37,16 +34,25 @@ export const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions =
     renderLineHighlight: 'none',
 };
 
-export function useMonacoLsp({ initialCode, settings }: UseMonacoLspProps) {
+export function useMonacoLsp({
+    initialCode,
+    settings,
+    apiAddressPrefix,
+    maxErrorCount,
+}: UseMonacoLspProps) {
     const monacoRef = useRef<typeof monaco>();
     const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
 
     const [code, setCode] = useState(initialCode);
 
-    const { lspSession, isWaitingForDiagnostics, diagnostics, error } = useLspSession({
-        initialCode,
-        settings,
-    });
+    // Memoize the props to avoid re-creating the lsp session
+    const memoizedProps = useMemo<UseMonacoLspProps>(
+        () => ({ initialCode, settings, apiAddressPrefix, maxErrorCount }),
+        [initialCode, settings, apiAddressPrefix, maxErrorCount]
+    );
+
+    const { lspSession, isWaitingForDiagnostics, diagnostics, error } =
+        useLspSession(memoizedProps);
 
     // Register providers when the editor is mounted
     useMonacoProviders({
