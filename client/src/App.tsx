@@ -91,7 +91,6 @@ export default function App() {
                     onUpdateSettings={(settings: LspSettings) => {
                         setLspSettings(settings);
                     }}
-                    code={code}
                 />
             </Box>
             <ProblemsPanel

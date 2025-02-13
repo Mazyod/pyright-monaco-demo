@@ -9,7 +9,6 @@ import { LspSettings } from '@/services/LspSession';
 
 export interface RightPanelProps {
     settings: LspSettings;
-    code: string;
 
     onUpdateSettings: (settings: LspSettings) => void;
 }
