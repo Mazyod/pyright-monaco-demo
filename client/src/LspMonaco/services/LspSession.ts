@@ -13,7 +13,7 @@ import type {
     SignatureHelp,
     WorkspaceEdit,
 } from 'vscode-languageserver-types';
-import { endpointRequest } from '../../services/EndpointUtils';
+import { endpointRequest } from './EndpointUtils';
 
 export interface DiagnosticEvents {
     onWaitingForDiagnostics: (isWaiting: boolean) => void;

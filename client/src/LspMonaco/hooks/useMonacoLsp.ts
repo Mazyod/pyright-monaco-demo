@@ -2,7 +2,7 @@ import { OnMount } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Range } from 'vscode-languageserver-types';
-import type { LspConfig } from '@/LspMonaco/services/LspSession';
+import type { LspConfig } from '../services/LspSession';
 import { convertDiagnostics, convertRange } from '../utils/typeConversions';
 import { useLspSession } from './useLspSession';
 import { useMonacoProviders } from './useMonacoProviders';

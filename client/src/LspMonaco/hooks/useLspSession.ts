@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Diagnostic } from 'vscode-languageserver-types';
-import { type LspConfig, LspSession } from '@/LspMonaco/services/LspSession';
+import { type LspConfig, LspSession } from '../services/LspSession';
 
 type UseLspSessionProps = LspConfig;
 

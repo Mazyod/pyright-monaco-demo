@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { TextDocumentEdit } from 'vscode-languageserver-types';
-import type { LspSession } from '@/LspMonaco/services/LspSession';
+import type { LspSession } from '../services/LspSession';
 import {
     convertCompletionItem,
     convertRange,
