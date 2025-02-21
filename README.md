@@ -5,9 +5,9 @@
 ## About this Fork
 
 > [!IMPORTANT]
-> This fork of Pyright Playground is focused on demonstrating the Pyright - Monaco Editor integration by reducing the code and reorganizing it to reusable parts.
+> This fork of Pyright Playground is focused on demonstrating the Pyright - Monaco Editor integration by reducing the code, reorganizing it to reusable parts, and supporting additional features.
 >
-> A lot of effort went into organizing the code to make it modular and reusable. You should essentially be able to copy/paste the `LspMonaco` directory and with relative ease integrated them with your own projects.
+> You should essentially be able to copy/paste the `LspMonaco` directory and with relative ease integrated them with your own projects.
 
 > [!TIP]
 > For an example of how to run Pyright directly on the browser, check out the [BasedPyright Playground](https://github.com/DetachHead/basedpyright-playground/) repository.
@@ -20,7 +20,9 @@ const monacoLsp = useMonacoLsp({
 });
 ```
 
-<img width="820" alt="image" src="https://github.com/user-attachments/assets/bc999ed5-7f4a-488c-85fc-0a43a171ec23" />
+🔥 Semantic Tokens support thanks to [basedpyright](https://basedpyright.com/)
+
+![image](https://github.com/user-attachments/assets/6c52637d-3628-4f5e-9216-933bf3b56e40)
 
 ---
 
