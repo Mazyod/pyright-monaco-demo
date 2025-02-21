@@ -136,10 +136,10 @@ export class LspSession {
         });
     }
 
-    async resolveCompletionItem(item: CompletionItem): Promise<CompletionItem> {
+    async resolveCompletionItem(completionItem: CompletionItem): Promise<CompletionItem> {
         return this._doWithSession<CompletionItem>(async (sessionId) => {
             const endpoint = this._apiAddressPrefix + `session/${sessionId}/completionresolve`;
-            return await endpointRequest('POST', endpoint, { completionItem: item });
+            return await endpointRequest('POST', endpoint, { completionItem });
         });
     }
 

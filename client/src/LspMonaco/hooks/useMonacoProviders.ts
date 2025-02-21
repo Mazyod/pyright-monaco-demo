@@ -42,29 +42,23 @@ const handleSemanticTokensRequest = (lspSession: LspSession) => ({
             'enum',
             'interface',
             'typeParameter',
-            'namespace'
+            'namespace',
         ],
-        tokenModifiers: [
-            'definition',
-            'async',
-            'readonly',
-            'static',
-            'local'
-        ]
+        tokenModifiers: ['definition', 'async', 'readonly', 'static', 'local'],
     }),
     provideDocumentSemanticTokens: async (model: monaco.editor.ITextModel) => {
         try {
             const tokens = await lspSession.getSemanticTokens(model.getValue());
             return {
                 data: new Uint32Array(tokens.data),
-                resultId: tokens.resultId
+                resultId: tokens.resultId,
             };
         } catch (error) {
             console.error('Failed to get semantic tokens:', error);
             return null;
         }
     },
-    releaseDocumentSemanticTokens: () => {}
+    releaseDocumentSemanticTokens: () => {},
 });
 
 const handleRenameRequest =
@@ -206,7 +200,8 @@ export function useMonacoProviders({ model, lspSession }: UseMonacoProvidersProp
             monaco.languages.registerRenameProvider('python', {
                 provideRenameEdits: handleRenameRequest(lspSession),
             }),
-            monaco.languages.registerDocumentSemanticTokensProvider('python', 
+            monaco.languages.registerDocumentSemanticTokensProvider(
+                'python',
                 handleSemanticTokensRequest(lspSession)
             )
         );
