@@ -37,6 +37,7 @@ export const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions =
         indentation: false,
     },
     renderLineHighlight: 'none',
+    'semanticHighlighting.enabled': true,
 };
 
 export function useMonacoLsp({
