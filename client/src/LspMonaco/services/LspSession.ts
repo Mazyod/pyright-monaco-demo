@@ -9,6 +9,7 @@ import type {
     Diagnostic,
     Position,
     Range,
+    SemanticTokens,
     SignatureHelp,
     WorkspaceEdit,
 } from 'vscode-languageserver-types';
@@ -106,8 +107,7 @@ export class LspSession {
     async getHoverForPosition(code: string, position: Position): Promise<HoverInfo> {
         return this._doWithSession<HoverInfo>(async (sessionId) => {
             const endpoint = this._apiAddressPrefix + `session/${sessionId}/hover`;
-            const data = await endpointRequest('POST', endpoint, { code, position });
-            return data.hover;
+            return await endpointRequest('POST', endpoint, { code, position });
         });
     }
 
@@ -118,32 +118,35 @@ export class LspSession {
     ): Promise<WorkspaceEdit | undefined> {
         return this._doWithSession<WorkspaceEdit>(async (sessionId) => {
             const endpoint = this._apiAddressPrefix + `session/${sessionId}/rename`;
-            const data = await endpointRequest('POST', endpoint, { code, position, newName });
-            return data.edits;
+            return await endpointRequest('POST', endpoint, { code, position, newName });
         });
     }
 
     async getSignatureHelpForPosition(code: string, position: Position): Promise<SignatureHelp> {
         return this._doWithSession<SignatureHelp>(async (sessionId) => {
             const endpoint = this._apiAddressPrefix + `session/${sessionId}/signature`;
-            const data = await endpointRequest('POST', endpoint, { code, position });
-            return data.signatureHelp;
+            return await endpointRequest('POST', endpoint, { code, position });
         });
     }
 
     async getCompletionForPosition(code: string, position: Position): Promise<CompletionList> {
         return this._doWithSession<CompletionList>(async (sessionId) => {
             const endpoint = this._apiAddressPrefix + `session/${sessionId}/completion`;
-            const data = await endpointRequest('POST', endpoint, { code, position });
-            return data.completionList;
+            return await endpointRequest('POST', endpoint, { code, position });
         });
     }
 
     async resolveCompletionItem(item: CompletionItem): Promise<CompletionItem> {
         return this._doWithSession<CompletionItem>(async (sessionId) => {
             const endpoint = this._apiAddressPrefix + `session/${sessionId}/completionresolve`;
-            const data = await endpointRequest('POST', endpoint, { completionItem: item });
-            return data.completionItem;
+            return await endpointRequest('POST', endpoint, { completionItem: item });
+        });
+    }
+
+    async getSemanticTokens(code: string): Promise<SemanticTokens> {
+        return this._doWithSession<{ data: number[]; resultId?: string }>(async (sessionId) => {
+            const endpoint = this._apiAddressPrefix + `session/${sessionId}/semantictokens`;
+            return await endpointRequest('POST', endpoint, { code });
         });
     }
 

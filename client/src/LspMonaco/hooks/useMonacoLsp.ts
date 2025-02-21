@@ -10,6 +10,7 @@ import useDebounce from './useDebounce';
 
 interface UseMonacoLspProps {
     initialCode: string;
+    theme?: string;
     lspConfig: LspConfig;
 }
 
@@ -40,6 +41,7 @@ export const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions =
 
 export function useMonacoLsp({
     initialCode,
+    theme,
     lspConfig: { settings, apiAddressPrefix, maxErrorCount },
 }: UseMonacoLspProps) {
     const monacoRef = useRef<typeof monaco>();
@@ -90,6 +92,11 @@ export function useMonacoLsp({
         monacoRef.current = monacoInstance;
         editorRef.current = editor;
         editor.focus();
+
+        if (theme) {
+            monacoInstance.editor.defineTheme('custom-theme', JSON.parse(theme));
+            monacoInstance.editor.setTheme('custom-theme');
+        }
     };
 
     // Handle code changes

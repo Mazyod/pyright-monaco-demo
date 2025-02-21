@@ -107,7 +107,7 @@ export function getHoverInfo(req: Request, res: Response) {
     langClient
         .getHoverInfo(codeWithOptions.code, codeWithOptions.position!)
         .then((hover) => {
-            res.status(200).json({ hover });
+            res.status(200).json(hover);
         })
         .catch((err) => {
             logger.error(`getHoverInfo returning a 500: ${err}`);
@@ -136,7 +136,7 @@ export function getRenameEdits(req: Request, res: Response) {
             codeWithOptions.newName ?? ''
         )
         .then((edits) => {
-            res.status(200).json({ edits });
+            res.status(200).json(edits);
         })
         .catch((err) => {
             logger.error(`getRenameEdits returning a 500: ${err}`);
@@ -159,7 +159,7 @@ export function getSignatureHelp(req: Request, res: Response) {
     langClient
         .getSignatureHelp(codeWithOptions.code, codeWithOptions.position!)
         .then((signatureHelp) => {
-            res.status(200).json({ signatureHelp });
+            res.status(200).json(signatureHelp);
         })
         .catch((err) => {
             logger.error(`getSignatureHelp returning a 500: ${err}`);
@@ -182,7 +182,7 @@ export function getCompletion(req: Request, res: Response) {
     langClient
         .getCompletion(codeWithOptions.code, codeWithOptions.position!)
         .then((completionList) => {
-            res.status(200).json({ completionList });
+            res.status(200).json(completionList);
         })
         .catch((err) => {
             logger.error(`getCompletion returning a 500: ${err}`);
@@ -207,7 +207,7 @@ export function resolveCompletion(req: Request, res: Response) {
     langClient
         .resolveCompletion(completionItem)
         .then((completionItem) => {
-            res.status(200).json({ completionItem });
+            res.status(200).json(completionItem);
         })
         .catch((err) => {
             logger.error(`resolveCompletion returning a 500: ${err}`);
