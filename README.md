@@ -9,6 +9,9 @@
 >
 > A lot of effort went into organizing the code to make it modular and reusable. You should essentially be able to copy/paste the `LspMonaco` directory and with relative ease integrated them with your own projects.
 
+> [!TIP]
+> For an example of how to run Pyright directly on the browser, check out the [BasedPyright Playground](https://github.com/DetachHead/basedpyright-playground/) repository.
+
 ```typescript
 const monacoLsp = useMonacoLsp({
   initialCode: initialState.code,
