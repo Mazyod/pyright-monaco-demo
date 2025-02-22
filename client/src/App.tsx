@@ -25,7 +25,14 @@ export default function App() {
 
     // #region - Monaco LSP
 
-    const apiAddressPrefix = 'http://localhost:8080/lsp/';
+    // Cache LSP config to avoid re-creating the session on every render.
+    const lspConfig = useMemo(() => {
+        const apiAddressPrefix = 'http://localhost:8080/lsp/';
+        return {
+            settings: lspSettings,
+            apiAddressPrefix,
+        };
+    }, [lspSettings]);
 
     const {
         code,
@@ -39,10 +46,7 @@ export default function App() {
     } = useMonacoLsp({
         initialCode: initialState.code,
         theme: editorTheme,
-        lspConfig: {
-            settings: lspSettings,
-            apiAddressPrefix,
-        },
+        lspConfig,
     });
 
     const sessionError = useMemo<Diagnostic[] | null>(() => {

@@ -4,14 +4,14 @@ import { type LspConfig, LspSession } from '../services/LspSession';
 
 type UseLspSessionProps = LspConfig;
 
-export function useLspSession(props: UseLspSessionProps) {
-    const [lspSession, setLspSession] = useState<LspSession>(() => new LspSession(props));
+export function useLspSession(lspConfig: UseLspSessionProps) {
+    const [lspSession, setLspSession] = useState<LspSession>(() => new LspSession(lspConfig));
     const [isWaitingForDiagnostics, setIsWaitingForDiagnostics] = useState(false);
     const [diagnostics, setDiagnostics] = useState<Diagnostic[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const session = new LspSession(props, {
+        const session = new LspSession(lspConfig, {
             onWaitingForDiagnostics: setIsWaitingForDiagnostics,
             onDiagnostics: setDiagnostics,
             onError: setError,
@@ -21,7 +21,7 @@ export function useLspSession(props: UseLspSessionProps) {
         return () => {
             session.shutdown();
         };
-    }, [props]); // NOTE: props are memoized, so this should be fine
+    }, [lspConfig]); // NOTE: lspConfig must be a stable reference!
 
     return {
         lspSession,
