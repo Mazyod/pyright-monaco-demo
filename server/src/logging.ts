@@ -4,9 +4,9 @@
  * and app insights in the cloud.
  */
 
-import * as winston from 'winston';
+import * as winston from "winston";
 
 // Create a simple console logger transport.
 export const logger = winston.createLogger({
-    transports: [new winston.transports.Console()],
+  transports: [new winston.transports.Console()],
 });

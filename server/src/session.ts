@@ -5,33 +5,33 @@
  * performance reasons.
  */
 
-import { ChildProcess } from 'node:child_process';
-import { LspClient } from './lspClient';
+import { ChildProcess } from "node:child_process";
+import { LspClient } from "./lspClient";
 
 export type SessionId = string;
 
 export interface SessionOptions {
-    typeCheckingMode?: string;
-    configOverrides?: { [name: string]: boolean };
-    code?: string;
+  typeCheckingMode?: string;
+  configOverrides?: { [name: string]: boolean };
+  code?: string;
 }
 
 export interface Session {
-    // A unique ID for this session.
-    readonly id: SessionId;
+  // A unique ID for this session.
+  readonly id: SessionId;
 
-    // Path to temp directory that contains the "project" for this session.
-    tempDirPath: string;
+  // Path to temp directory that contains the "project" for this session.
+  tempDirPath: string;
 
-    // Child process running the language server for this session.
-    langServerProcess?: ChildProcess;
+  // Child process running the language server for this session.
+  langServerProcess?: ChildProcess;
 
-    // Proxy language client that interacts with the server.
-    langClient?: LspClient;
+  // Proxy language client that interacts with the server.
+  langClient?: LspClient;
 
-    // Timestamp of last request to the session.
-    lastAccessTime: number;
+  // Timestamp of last request to the session.
+  lastAccessTime: number;
 
-    // Options associated with the session.
-    options?: SessionOptions;
+  // Options associated with the session.
+  options?: SessionOptions;
 }

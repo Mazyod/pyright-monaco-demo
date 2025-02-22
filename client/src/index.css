@@ -1,13 +1,13 @@
 :root {
-    color-scheme: light;
+  color-scheme: light;
 
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Reset some default browser styles */
 body {
-    margin: 0;
+  margin: 0;
 }
