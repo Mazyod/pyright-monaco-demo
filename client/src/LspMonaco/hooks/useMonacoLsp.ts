@@ -19,7 +19,7 @@ export interface MonacoEditorRef {
     selectRange: (range: Range) => void;
 }
 
-export const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
+const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
     selectOnLineNumbers: true,
     minimap: { enabled: false },
     fixedOverflowWidgets: true,
@@ -126,6 +126,7 @@ export function useMonacoLsp({
 
     return {
         code,
+        editorOptions,
         isWaitingForDiagnostics,
         diagnostics,
         error,

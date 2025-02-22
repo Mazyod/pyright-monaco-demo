@@ -15,7 +15,7 @@ import { ProblemsPanel } from '@/components/ProblemsPanel';
 import { RightPanel } from '@/components/RightPanel';
 import type { LspSettings } from '@/LspMonaco/services/LspSession';
 import { Editor } from '@monaco-editor/react';
-import { editorOptions, useMonacoLsp } from './LspMonaco';
+import { useMonacoLsp } from './LspMonaco';
 import editorTheme from '@/assets/theme.json?raw';
 
 const initialState = getInitialStateFromLocalStorage();
@@ -29,6 +29,7 @@ export default function App() {
 
     const {
         code,
+        editorOptions,
         isWaitingForDiagnostics,
         diagnostics,
         error,
