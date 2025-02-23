@@ -37,7 +37,7 @@ export interface LspConfig {
 }
 
 export interface LspSettings {
-  strictMode?: boolean;
+  typeCheckingMode?: "strict" | "standard" | "basic" | "off";
   configOverrides: { [name: string]: boolean };
 }
 
@@ -114,7 +114,7 @@ export class LspSession {
   async getRenameEditsForPosition(
     code: string,
     position: Position,
-    newName: string,
+    newName: string
   ): Promise<WorkspaceEdit | undefined> {
     return this._doWithSession<WorkspaceEdit>(async (sessionId) => {
       const endpoint = this._apiAddressPrefix + `session/${sessionId}/rename`;
@@ -190,24 +190,11 @@ export class LspSession {
       return Promise.resolve(this._sessionId);
     }
 
-    let typeCheckingMode: "strict" | undefined;
-    let code: string | undefined;
-    let configOverrides: { [name: string]: boolean } | undefined;
-
-    if (this._settings) {
-      if (this._settings.strictMode) {
-        typeCheckingMode = "strict";
-      }
-
-      code = this._code;
-      configOverrides = { ...this._settings.configOverrides };
-    }
-
     const endpoint = this._apiAddressPrefix + `session`;
     const data = await endpointRequest("POST", endpoint, {
-      typeCheckingMode,
-      code,
-      configOverrides,
+      typeCheckingMode: this._settings?.typeCheckingMode,
+      code: this._code,
+      configOverrides: this._settings?.configOverrides,
     });
     this._sessionId = data.sessionId;
     return data.sessionId;

@@ -3,7 +3,7 @@
  * A panel that displays settings for the app.
  */
 
-import { Box, Typography } from "@mui/material";
+import { Box, FormControl, MenuItem, Select, Typography } from "@mui/material";
 import { useRef } from "react";
 import { CheckmarkMenu, CheckmarkMenuItem } from "./CheckmarkMenu";
 import IconButton from "./IconButton";
@@ -14,7 +14,6 @@ import {
   configSettings,
   configSettingsAlphabetized,
 } from "./PyrightConfigSettings";
-import { SettingsCheckbox } from "./SettingsCheckBox";
 import type { LspSettings } from "@/LspMonaco/services/LspSession";
 
 interface ConfigOptionWithValue {
@@ -34,19 +33,25 @@ export function SettingsPanel(props: SettingsPanelProps) {
   return (
     <Box sx={styles.container}>
       <SettingsHeader headerText={"Configuration Options"} />
-      <SettingsCheckbox
-        key={"strict"}
-        label={"Strict"}
-        title={"Enable set of strict type checking options"}
-        disabled={false}
-        value={!!props.settings.strictMode}
-        onChange={() => {
-          props.onUpdateSettings({
-            ...props.settings,
-            strictMode: !props.settings.strictMode,
-          });
-        }}
-      />
+      <Box sx={styles.typeCheckingContainer}>
+        <Typography sx={styles.typeCheckingLabel}>Type Checking Mode</Typography>
+        <FormControl size="small" sx={styles.typeCheckingSelect}>
+          <Select
+            value={props.settings.typeCheckingMode || "standard"}
+            onChange={(event) => {
+              props.onUpdateSettings({
+                ...props.settings,
+                typeCheckingMode: event.target.value as "strict" | "standard" | "basic" | "off",
+              });
+            }}
+          >
+            <MenuItem value="strict">Strict</MenuItem>
+            <MenuItem value="standard">Standard</MenuItem>
+            <MenuItem value="basic">Basic</MenuItem>
+            <MenuItem value="off">Off</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
 
       <Box sx={styles.selectionContainer}>
         <Typography sx={styles.selectedOptionText}>
@@ -159,7 +164,10 @@ function ConfigOverride(props: ConfigOverrideProps) {
 }
 
 function areSettingsDefault(settings: LspSettings): boolean {
-  return Object.keys(settings.configOverrides).length === 0 && !settings.strictMode;
+  return (
+    Object.keys(settings.configOverrides).length === 0 &&
+    (!settings.typeCheckingMode || settings.typeCheckingMode === "standard")
+  );
 }
 
 function getNonDefaultConfigOptions(settings: LspSettings): ConfigOptionWithValue[] {
@@ -168,7 +176,7 @@ function getNonDefaultConfigOptions(settings: LspSettings): ConfigOptionWithValu
   configSettingsAlphabetized.forEach((configInfo) => {
     // If strict mode is in effect, don't consider overrides if the
     // config option is always on in strict mode.
-    if (settings.strictMode && configInfo.isEnabledInStrict) {
+    if (settings.typeCheckingMode === "strict" && configInfo.isEnabledInStrict) {
       return;
     }
 
@@ -191,8 +199,8 @@ function getConfigOptionMenuItem(
 
   return {
     label: config.name,
-    checked: isEnabled || (config.isEnabledInStrict && !!settings.strictMode),
-    disabled: config.isEnabledInStrict && settings.strictMode,
+    checked: isEnabled || (config.isEnabledInStrict && settings.typeCheckingMode === "strict"),
+    disabled: config.isEnabledInStrict && settings.typeCheckingMode === "strict",
     title: config.description,
   };
 }
@@ -215,6 +223,22 @@ function toggleConfigOption(settings: LspSettings, optionName: string): LspSetti
 }
 
 const styles = {
+  typeCheckingContainer: {
+    display: "flex",
+    flexDirection: "column",
+    // alignItems: "center",
+    gap: 1,
+    px: 2,
+    py: 1,
+  },
+  typeCheckingLabel: {
+    fontSize: 13,
+    color: "#333",
+    flex: 1,
+  },
+  typeCheckingSelect: {
+    minWidth: 120,
+  },
   container: {
     flex: 1,
     display: "flex",
